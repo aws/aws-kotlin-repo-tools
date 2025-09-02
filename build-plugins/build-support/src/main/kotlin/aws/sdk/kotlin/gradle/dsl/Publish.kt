@@ -87,7 +87,7 @@ fun Project.skipPublishing() {
 }
 
 // TODO Remove this once aws-sdk-kotlin migrates to Central Portal
-fun Project.configureNexusPublishing(repoName: String, githubOrganization: String = "awslabs") {
+fun Project.configureNexusPublishing(repoName: String, githubOrganization: String = "aws") {
     val project = this
     apply(plugin = "maven-publish")
 
@@ -188,7 +188,7 @@ fun Project.configureNexusPublishing(repoName: String, githubOrganization: Strin
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
  * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
+fun Project.configurePublishing(repoName: String, githubOrganization: String = "aws") {
     val project = this
     apply(plugin = "maven-publish")
 
