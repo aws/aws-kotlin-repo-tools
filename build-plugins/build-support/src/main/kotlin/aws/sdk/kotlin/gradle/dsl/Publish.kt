@@ -342,13 +342,6 @@ fun Project.configureJReleaser() {
             version = providers.gradleProperty("sdkVersion").get()
         }
 
-        // FIXME We're currently signing the artifacts twice. Once using the logic in configurePublishing above,
-        // and the second time during JReleaser's signing stage.
-        signing {
-            active = Active.ALWAYS
-            armored = true
-        }
-
         // JReleaser requires a releaser to be configured even though we don't use it.
         // https://github.com/jreleaser/jreleaser/discussions/1725#discussioncomment-10674529
         release {
