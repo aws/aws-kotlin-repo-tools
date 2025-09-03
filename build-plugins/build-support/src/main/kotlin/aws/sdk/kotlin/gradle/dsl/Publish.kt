@@ -357,7 +357,7 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
-                        active = Active.ALWAYS // The Maven deployer default is ALWAYS, but MavenCentral is NEVER
+                        active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
                         sign = false // Signing is done when publishing, see the 'configurePublishing' function
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
