@@ -62,7 +62,6 @@ internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
     "iosArm64",
     "iosSimulatorArm64",
     "iosX64",
-
     "linuxArm64",
     "linuxX64",
     "macosArm64",
@@ -321,14 +320,22 @@ fun Project.configureJReleaser() {
         return
     }
 
-    // Collect a set of native artifact IDs from every project
+    // Collect a set of native artifact IDs (with platform suffix removed) from every project
     val nativeArtifactIds = providers.provider {
         allprojects.flatMap {
             it.extensions.findByType(PublishingExtension::class.java)
                 ?.publications
                 ?.withType(MavenPublication::class.java)
                 ?.filter { it.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES }
-                ?.map { it.artifactId }
+                ?.map {
+                    // Remove platform from artifact ID. This allows us to register artifact overrides for _all_ platforms,
+                    // not just for the targets enabled on the current host.
+                    var artifactIdWithoutPlatform = it.artifactId
+                    ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach { platform ->
+                        artifactIdWithoutPlatform = artifactIdWithoutPlatform.removeSuffix("-${platform.lowercase()}")
+                    }
+                    artifactIdWithoutPlatform
+                }
                 ?: emptySet()
         }.toSet()
     }
@@ -368,14 +375,17 @@ fun Project.configureJReleaser() {
                                 verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
                             }
                             gradle.projectsEvaluated {
-                                nativeArtifactIds.get().forEach {
-                                    artifactOverride {
-                                        artifactId = it
-                                        jar = false // Native artifacts produce klibs, not JARs
-                                        verifyPom = false // JReleaser fails when processing <packaging>klib</packaging> tag: `Unknown packaging: klib`
+                                nativeArtifactIds.get().forEach { artifactIdWithoutPlatform ->
+                                    // Add an artifact override rule for each platform
+                                    ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach { platform ->
+                                        logger.info("Configuring JReleaser artifact override for $artifactIdWithoutPlatform-${platform.lowercase()}")
+                                        artifactOverride {
+                                            artifactId = "$artifactIdWithoutPlatform-${platform.lowercase()}"
+                                            jar = false // Native artifacts produce klibs, not JARs
+                                            verifyPom = false // JReleaser fails when processing <packaging>klib</packaging> tag: `Unknown packaging: klib`
+                                        }
                                     }
                                 }
-                                logger.info("Configured JReleaser artifact overrides for the following artifacts: ${nativeArtifactIds.get().joinToString()}")
                             }
                         }
                         maxRetries = 100
