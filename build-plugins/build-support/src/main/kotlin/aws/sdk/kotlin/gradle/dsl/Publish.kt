@@ -367,6 +367,7 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
+                        active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
