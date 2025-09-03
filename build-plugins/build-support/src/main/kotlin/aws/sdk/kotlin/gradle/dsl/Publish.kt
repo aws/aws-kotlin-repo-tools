@@ -313,9 +313,6 @@ fun Project.configureJReleaser() {
     val requiredVariables = listOf(
         EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
         EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
-        EnvironmentVariables.GPG_PASSPHRASE,
-        EnvironmentVariables.GPG_PUBLIC_KEY,
-        EnvironmentVariables.GPG_SECRET_KEY,
         EnvironmentVariables.GENERIC_TOKEN,
     )
 
@@ -361,6 +358,7 @@ fun Project.configureJReleaser() {
                 mavenCentral {
                     create("maven-central") {
                         active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
+                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
