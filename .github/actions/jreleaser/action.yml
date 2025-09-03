@@ -1,7 +1,7 @@
 # TODO: Delete this action when we migrate off JReleaser for all our releases
 
 name: JReleaser check
-description: Smoke tests that checks our jreleaser release command works
+description: Smoke test that checks our jreleaser release command works
 runs:
   using: composite
   steps:
@@ -15,7 +15,6 @@ runs:
       shell: bash
       run: |
         export JRELEASER_PROJECT_JAVA_GROUP_ID="com.sonatype.central.testing.amazon"
-        export JRELEASER_MAVENCENTRAL_STAGE="UPLOAD"
         export JRELEASER_MAVENCENTRAL_USERNAME="foo"
         export JRELEASER_MAVENCENTRAL_TOKEN="foo"
         export JRELEASER_GENERIC_TOKEN="foo"
