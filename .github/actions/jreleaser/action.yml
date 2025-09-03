@@ -16,16 +16,8 @@ runs:
       run: |
         export JRELEASER_PROJECT_JAVA_GROUP_ID="com.sonatype.central.testing.amazon"
         export JRELEASER_MAVENCENTRAL_STAGE="UPLOAD"
+        export JRELEASER_MAVENCENTRAL_USERNAME="foo"
+        export JRELEASER_MAVENCENTRAL_TOKEN="foo"
+        export JRELEASER_GENERIC_TOKEN="foo"
         
-        export JRELEASER_MAVENCENTRAL_USERNAME="foobar"
-        export JRELEASER_MAVENCENTRAL_TOKEN="foobar"
-        
-        export JRELEASER_GENERIC_TOKEN="foobar"
-        
-        export JRELEASER_GPG_PASSPHRASE="foobar"
-        export JRELEASER_GPG_PUBLIC_KEY="-----BEGIN PGP PUBLIC KEY BLOCK-----
-        -----END PGP PUBLIC KEY BLOCK-----"
-        export JRELEASER_GPG_SECRET_KEY="-----BEGIN PGP PRIVATE KEY BLOCK-----
-        -----END PGP PRIVATE KEY BLOCK-----"
-        
-        ./gradlew jreleaserFullRelease --dryrun --stacktrace #TODO: Remove stacktrace
+        ./gradlew jreleaserFullRelease --dryrun --stacktrace
