@@ -8,7 +8,7 @@ runs:
       uses: actions/checkout@v4
 
     - name: Setup kat
-      uses: awslabs/aws-kotlin-repo-tools/.github/actions/setup-kat@main
+      uses: aws/aws-kotlin-repo-tools/.github/actions/setup-kat@main
 
     - name: Check for new changelog entry
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-changelog') }}
