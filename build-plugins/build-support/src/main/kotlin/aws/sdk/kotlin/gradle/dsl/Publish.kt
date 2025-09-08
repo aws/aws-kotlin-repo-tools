@@ -247,6 +247,27 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
                 sign(publications)
             }
 
+            // Register a task that allows you to sign publications which have already been staged in build/m2
+            project.tasks.register<Sign>("signAllPublications") {
+                val publicationsDir = layout.buildDirectory.dir("m2").get().asFile
+                val toSignTree = fileTree(publicationsDir) {
+                    include("**/*.pom", "**/*.module")
+                    include("**/*.jar")
+                    include("**/*.klib")
+                    include("**/*.aar")
+                    include("**/*.zip", "**/*.tar", "**/*.tar.gz")
+                }
+
+                inputs.files(toSignTree)
+                outputs.upToDateWhen { false } // always re-run task
+
+                doFirst {
+                    logger.lifecycle("Recomputing signatures for ${toSignTree.files.size} artifacts in $publicationsDir")
+                }
+
+                sign(*toSignTree.files.toTypedArray())
+            }
+
             // FIXME - workaround for https://github.com/gradle/gradle/issues/26091
             val signingTasks = tasks.withType<Sign>()
             tasks.withType<AbstractPublishToMaven>().configureEach {
