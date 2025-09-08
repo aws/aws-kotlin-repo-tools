@@ -21,6 +21,7 @@ runs:
         
         export JRELEASER_GPG_PASSPHRASE="foo"
         export JRELEASER_GPG_PUBLIC_KEY="-----BEGIN PGP PUBLIC KEY BLOCK-----
+
         mDMEaL8nuRYJKwYBBAHaRw8BAQdAWL775FzgrwDmg7muKyddMoed4k/Xb/fYly/J
         /uDD2wy0BHRlc3SIkwQTFgoAOxYhBLcG5xXLamZFShYwTwukzlxOPrMDBQJovye5
         AhsDBQsJCAcCAiICBhUKCQgLAgQWAgMBAh4HAheAAAoJEAukzlxOPrMDAHsBAPC+
@@ -31,21 +32,24 @@ runs:
         2Faek9vBPZlTM7Caoeq4tSV4AQCYcg1P9BFghqhnwvrRZvdQQTx76umHLz8enbke
         OAHfDw==
         =/9s0
-        -----END PGP PUBLIC KEY BLOCK-----"
+        -----END PGP PUBLIC KEY BLOCK-----
+        "
         export JRELEASER_GPG_SECRET_KEY="-----BEGIN PGP PRIVATE KEY BLOCK-----
+
         lIYEaL8nuRYJKwYBBAHaRw8BAQdAWL775FzgrwDmg7muKyddMoed4k/Xb/fYly/J
-        /uDD2wz+BwMCaLqUQm4ihML7jBPOkRNRNSycy2m45R0GXzH9c1M7ImKOxYfBxrcx
-        xu+EAJ5eWvpr2//wZ+qHHXS0Rh8/SL9DoX+sFE9pRx6yJlDBO90mK7QEdGVzdIiT
+        /uDD2wz+BwMCt8L5E1VPKf77t6bLQLCI+2wjvZ44neIE4Y1VKcXo0Al8Dr3kiQ/g
+        1QU5HyRVGFjP1D4G4t3uRItcXVTkTIjS8CPEbDX9gjmKI11ofAy6U7QEdGVzdIiT
         BBMWCgA7FiEEtwbnFctqZkVKFjBPC6TOXE4+swMFAmi/J7kCGwMFCwkIBwICIgIG
         FQoJCAsCBBYCAwECHgcCF4AACgkQC6TOXE4+swMAewEA8L55QwOUmW9AMt243T4E
         YPvlEQ3JrJk40dPjYfb5T5oA/3DBAEl+EIITNjcal5q8WDPgjJZl/laHibb+oo+l
         bXQHnIsEaL8nuRIKKwYBBAGXVQEFAQEHQARMbgEPVyAOqzWV9T35H8QK+VjgB2I7
-        yKoFS25pu0xnAwEIB/4HAwKJuUDoPaqNo/ssfY0b1vWGopVJneFheLIOWAMjWeur
-        8MjxaRS7IyFjPrm8p0W0/SSoKuGNdU390bwrKFmjmv5UfJrKGpJTiZZHt2awtvds
+        yKoFS25pu0xnAwEIB/4HAwJjZQiU4xs+4/szvtJM8d6hcARU5Q4Q5SZUB2AL2RCm
+        DdH6rGZUEQCu4GTkp0vdvLHv0xiBOPBbbvMbmB3o4ZY+PjhHWnPjRMq4+x9owetd
         iHgEGBYKACAWIQS3BucVy2pmRUoWME8LpM5cTj6zAwUCaL8nuQIbDAAKCRALpM5c
         Tj6zA7s5AP9ll4fFopH6cejuMaGX9NhWnpPbwT2ZUzOwmqHquLUleAEAmHINT/QR
         YIaoZ8L60Wb3UEE8e+rphy8/Hp25HjgB3w8=
-        =Cn5U
-        -----END PGP PRIVATE KEY BLOCK-----"
+        =9G5n
+        -----END PGP PRIVATE KEY BLOCK-----
+        "
         
         ./gradlew jreleaserFullRelease --dryrun --stacktrace
