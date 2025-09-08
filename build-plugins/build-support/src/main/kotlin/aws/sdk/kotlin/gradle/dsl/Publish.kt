@@ -244,7 +244,6 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(secretKey, passphrase)
-                sign(publications)
             }
 
             // Register a task that allows you to sign publications which have already been staged in build/m2
