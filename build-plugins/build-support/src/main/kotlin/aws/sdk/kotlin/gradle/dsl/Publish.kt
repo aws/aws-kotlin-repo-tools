@@ -182,8 +182,7 @@ fun Project.configureNexusPublishing(repoName: String, githubOrganization: Strin
 }
 
 /**
- * Configure publishing for this project. This applies the `maven-publish` and `signing` plugins and configures
- * the publications.
+ * Configure publishing for this project. This applies the `maven-publish` plugin and configures publications.
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
  * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
@@ -234,43 +233,6 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 
                     artifact(javadocJar)
                 }
-            }
-        }
-
-        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
-
-        if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
-            apply(plugin = "signing")
-            extensions.configure<SigningExtension> {
-                useInMemoryPgpKeys(secretKey, passphrase)
-            }
-
-            // Register a task that allows you to sign publications which have already been staged in build/m2
-            project.tasks.register<Sign>("signAllPublications") {
-                val publicationsDir = layout.buildDirectory.dir("m2").get().asFile
-                val toSignTree = fileTree(publicationsDir) {
-                    include("**/*.pom", "**/*.module")
-                    include("**/*.jar")
-                    include("**/*.klib")
-                    include("**/*.aar")
-                    include("**/*.zip", "**/*.tar", "**/*.tar.gz")
-                }
-
-                inputs.files(toSignTree)
-                outputs.upToDateWhen { false } // always re-run task
-
-                doFirst {
-                    logger.lifecycle("Recomputing signatures for ${toSignTree.files.size} artifacts in $publicationsDir")
-                }
-
-                sign(*toSignTree.files.toTypedArray())
-            }
-
-            // FIXME - workaround for https://github.com/gradle/gradle/issues/26091
-            val signingTasks = tasks.withType<Sign>()
-            tasks.withType<AbstractPublishToMaven>().configureEach {
-                mustRunAfter(signingTasks)
             }
         }
     }
@@ -332,6 +294,9 @@ fun Project.configureJReleaser() {
     val requiredVariables = listOf(
         EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
         EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
+        EnvironmentVariables.GPG_PASSPHRASE,
+        EnvironmentVariables.GPG_PUBLIC_KEY,
+        EnvironmentVariables.GPG_SECRET_KEY,
         EnvironmentVariables.GENERIC_TOKEN,
     )
 
@@ -366,6 +331,11 @@ fun Project.configureJReleaser() {
             version = providers.gradleProperty("sdkVersion").get()
         }
 
+        signing {
+            active = Active.ALWAYS
+            armored = true
+        }
+
         // JReleaser requires a releaser to be configured even though we don't use it.
         // https://github.com/jreleaser/jreleaser/discussions/1725#discussioncomment-10674529
         release {
@@ -385,7 +355,6 @@ fun Project.configureJReleaser() {
                 mavenCentral {
                     create("maven-central") {
                         active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
-                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
