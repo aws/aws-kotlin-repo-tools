@@ -379,6 +379,14 @@ fun Project.configureJReleaser() {
                         }
                         maxRetries = 100
                         retryDelay = 60 // seconds
+                        snapshotSupported = false // do not allow publication of snapshot artifacts
+                        applyMavenCentralRules = true
+                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
+                        sign = true
+                        checksums = true
+                        sourceJar = true
+                        javadocJar = true
+                        verifyPom = true
                     }
                 }
             }
