@@ -9,7 +9,7 @@ import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
-class MultilineIfElseBlockRule : Rule(RuleId("aws-repo-tools-rules:multiline-if-else-block"), About()) {
+class MultilineIfElseBlockRule : Rule(RuleId("repo-tools:multiline-if-else-block"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,

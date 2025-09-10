@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.psi.KtBlockExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtReturnExpression
 
-class ExpressionBodyRule : Rule(RuleId("aws-repo-tools-rules:expression-body"), About()) {
+class ExpressionBodyRule : Rule(RuleId("repo-tools:expression-body"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,
