@@ -15,7 +15,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
  * Configure lint rules for the project
  * @param lintPaths list of paths relative to the project root to lint (or not lint).
  */
-fun Project.configureLinting(lintPaths: List<String>) {
+fun Project.configureLinting(lintPaths: List<String>, repoToolsVersion: String) {
     verifyRootProject { "Kotlin SDK lint configuration is expected to be configured on the root project" }
 
     val ktlintVersion = object {} // Can't use Project.javaClass because that's using the Gradle classloader
@@ -32,6 +32,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             }
         }
+        ktlint("aws.sdk.kotlin.gradle:ktlint-rules:$repoToolsVersion")
     }
 
     // add the buildscript classpath which should pick up our custom ktlint-rules (via runtimeOnly dep on this plugin)
