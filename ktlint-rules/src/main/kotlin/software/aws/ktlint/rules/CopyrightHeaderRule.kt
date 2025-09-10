@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCommentImpl
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType
 
-class CopyrightHeaderRule : Rule(RuleId("custom-ktlint-rules:copyright-header"), About()) {
+class CopyrightHeaderRule : Rule(RuleId("aws-repo-tools-rules:copyright-header"), About()) {
     companion object {
         private val header = """
         /*
