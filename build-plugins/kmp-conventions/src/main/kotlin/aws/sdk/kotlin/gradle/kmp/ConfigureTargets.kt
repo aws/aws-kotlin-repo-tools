@@ -108,13 +108,13 @@ fun Project.configureKmpTargets() {
         // FIXME Configure JS
 
         if (NATIVE_ENABLED) {
-            if ((hasApple || hasDesktop) && HostManager.hostIsMac) {
+            if ((hasApple || hasDesktop) && (HostManager.hostIsMac || NATIVE_ENABLE_ALL_TARGETS)) {
                 kmpExt.apply { configureApple() }
             }
-            if ((hasWindows || hasDesktop) && HostManager.hostIsMingw) {
+            if ((hasWindows || hasDesktop) && (HostManager.hostIsMingw || NATIVE_ENABLE_ALL_TARGETS)) {
                 kmpExt.apply { configureWindows() }
             }
-            if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
+            if ((hasLinux || hasDesktop) && (HostManager.hostIsLinux || NATIVE_ENABLE_ALL_TARGETS)) {
                 if (group == "aws.sdk.kotlin.crt") { // TODO Remove special-casing once K/N is released across the entire project
                     kmpExt.apply { configureLinux() }
                 } else {
@@ -220,3 +220,4 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
 
 val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
 val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
+val Project.NATIVE_ENABLE_ALL_TARGETS get() = prop("aws.kotlin.native.enableAllTargets")?.let { it == "true" } ?: false
