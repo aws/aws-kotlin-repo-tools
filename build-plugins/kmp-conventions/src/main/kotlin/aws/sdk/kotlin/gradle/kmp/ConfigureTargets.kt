@@ -42,12 +42,13 @@ val Project.hasDesktop: Boolean get() = hasNative || files.any { it.name == "des
 val Project.hasLinux: Boolean get() = hasNative || hasJvmAndNative || files.any { it.name == "linux" }
 val Project.hasApple: Boolean get() = hasNative || hasJvmAndNative || files.any { it.name == "apple" }
 val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "windows" }
+val Project.hasPosix: Boolean get() = hasNative || hasJvmAndNative || files.any { it.name == "posix" }
 
 /**
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows
+val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows || hasPosix
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
@@ -92,6 +93,16 @@ fun Project.configureKmpTargets() {
                     group("desktop") {
                         withLinux()
                         withMingw()
+                        withMacos()
+                    }
+                }
+            }
+
+            if (hasPosix) {
+                common {
+                    group("posix") {
+                        // Linux and Apple but NOT Mingw/Windows
+                        withLinux()
                         withMacos()
                     }
                 }
