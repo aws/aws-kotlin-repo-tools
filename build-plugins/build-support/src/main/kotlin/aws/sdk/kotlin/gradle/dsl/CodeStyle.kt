@@ -6,6 +6,7 @@ package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
 import org.gradle.kotlin.dsl.*
@@ -15,7 +16,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
  * Configure lint rules for the project
  * @param lintPaths list of paths relative to the project root to lint (or not lint).
  */
-fun Project.configureLinting(lintPaths: List<String>, repoToolsVersion: String) {
+fun Project.configureLinting(lintPaths: List<String>) {
     verifyRootProject { "Kotlin SDK lint configuration is expected to be configured on the root project" }
 
     val ktlintVersion = object {} // Can't use Project.javaClass because that's using the Gradle classloader
@@ -23,6 +24,13 @@ fun Project.configureLinting(lintPaths: List<String>, repoToolsVersion: String) 
         .getResource("ktlint-version.txt")
         ?.readText()
         ?: error("Missing ktlint-version.txt")
+
+    val repoToolsVersion = extensions
+        .getByType<VersionCatalogsExtension>()
+        .named("libs")
+        .findVersion("aws-kotlin-repo-tools-version")
+        .get()
+        .requiredVersion
 
     val ktlint by configurations.creating
 
