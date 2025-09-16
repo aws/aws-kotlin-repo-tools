@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.ktlint.rule.engine)
-                implementation("org.slf4j:slf4j-simple:2.0.7") // TODO: Move to libs
+                implementation(libs.slf4j.simple) // Required by ktlint rule engine tests
             }
         }
     }
