@@ -16,15 +16,28 @@ kotlin {
     sourceSets {
         main {
             dependencies {
-                implementation(libs.ktlint.cli.ruleset.core)
+                api(libs.ktlint.cli.ruleset.core)
             }
         }
 
         test {
             dependencies {
-                implementation(libs.ktlint.test)
+                implementation(kotlin("test"))
+                implementation(libs.ktlint.rule.engine)
+                implementation("org.slf4j:slf4j-simple:2.0.7") // TODO: Move to libs
             }
         }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        showStackTraces = true
+        showExceptions = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }
 

@@ -1,0 +1,14 @@
+name: Minor version bump
+description: Verifies branch is ready to merge before minor version bump
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure Gradle
+      uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
+
+    - name: Verify minor version bump
+      shell: bash
+      run: ./gradlew minorVersionBumpScan

@@ -15,7 +15,7 @@ aws-sdk-cloudwatch = { module = "aws.sdk.kotlin:cloudwatch", version.ref = "aws-
 aws-sdk-s3 = { module = "aws.sdk.kotlin:s3", version.ref = "aws-sdk-version" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint" }
-ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
+ktlint-rule-engine = { module = "com.pinterest.ktlint:ktlint-rule-engine", version.ref = "ktlint" }
 nexus-publish-plugin = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "nexus-plugin-version" }
 jreleaser-plugin = { module = "org.jreleaser:jreleaser-gradle-plugin", version.ref = "jreleaser-plugin-version" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
