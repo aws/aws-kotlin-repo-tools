@@ -40,7 +40,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             }
         }
-        ktlint("aws.sdk.kotlin.gradle:style:$repoToolsVersion")
+        ktlint("aws.sdk.kotlin.gradle:style-rules:$repoToolsVersion")
     }
 
     // add the buildscript classpath which should pick up our custom ktlint-rules (via runtimeOnly dep on this plugin)

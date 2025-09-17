@@ -15,7 +15,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
- * Configures Gradle tasks that run or fix minor-version-bump-specific Ktlint rules.
+ * Configures Gradle task for minor-version-bump-specific Ktlint rules.
  */
 fun Project.configureMinorVersionStrategyRules(lintPaths: List<String>) {
     verifyRootProject { "Task configuration is expected to be configured on the root project" }
