@@ -82,28 +82,34 @@ fun Project.configureKmpTargets() {
 
             if (hasWindows) {
                 common {
-                    group("windows") {
-                        withMingw()
+                    group("native") {
+                        group("windows") {
+                            withMingw()
+                        }
                     }
                 }
             }
 
             if (hasDesktop) {
                 common {
-                    group("desktop") {
-                        withLinux()
-                        withMingw()
-                        withMacos()
+                    group("native") {
+                        group("desktop") {
+                            withLinux()
+                            withMingw()
+                            withMacos()
+                        }
                     }
                 }
             }
 
             if (hasPosix) {
                 common {
-                    group("posix") {
-                        // Linux and Apple but NOT Mingw/Windows
-                        withLinux()
-                        withMacos()
+                    group("native") {
+                        group("posix") {
+                            // Linux and Apple but NOT Mingw/Windows
+                            withLinux()
+                            withApple()
+                        }
                     }
                 }
             }
