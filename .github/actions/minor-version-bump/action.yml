@@ -11,4 +11,4 @@ runs:
 
     - name: Verify minor version bump
       shell: bash
-      run: ./gradlew minorVersionBumpScan
+      run: ./gradlew verifyMinorVersionBump

@@ -22,7 +22,7 @@ internal fun deprecatedUntilVersionRegex(major: Int, minor: Int): Regex =
  * Creates a ktlint rule that detects APIs annotated with @DeprecatedUntilVersion for the specified versions.
  * If autocorrect is enabled, the API will be deleted.
  */
-fun apisScheduledForRemovalRule(major: Int, minor: Int): Rule =
+fun deprecatedApiRule(major: Int, minor: Int): Rule =
     object : Rule(RuleId("minor-version-strategy:apis-scheduled-for-removal"), About()) {
         override fun beforeVisitChildNodes(
             node: ASTNode,

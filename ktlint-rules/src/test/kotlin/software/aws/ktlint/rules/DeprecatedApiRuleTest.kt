@@ -14,10 +14,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class ApisScheduledForRemovalRuleTest {
+class DeprecatedApiRuleTest {
     val ruleEngine = KtLintRuleEngine(
         ruleProviders = setOf(
-            RuleProvider { apisScheduledForRemovalRule(1, 2) },
+            RuleProvider { deprecatedApiRule(1, 2) },
         ),
     )
 

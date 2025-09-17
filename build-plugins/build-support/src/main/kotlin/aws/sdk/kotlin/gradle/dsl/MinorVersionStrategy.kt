@@ -35,7 +35,7 @@ fun Project.configureMinorVersionStrategyRules(lintPaths: List<String>) {
         minorVersionBumpKtlint(project(":ktlint-rules:minor-version-strategy"))
     }
 
-    tasks.register<JavaExec>("minorVersionBumpScan") {
+    tasks.register<JavaExec>("verifyMinorVersionBump") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Check minor version bump rules"
         classpath = minorVersionBumpKtlint
@@ -43,9 +43,9 @@ fun Project.configureMinorVersionStrategyRules(lintPaths: List<String>) {
         args = lintPaths
     }
 
-    tasks.register<JavaExec>("minorVersionBumpFix") {
+    tasks.register<JavaExec>("fixMinorVersionBump") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Check minor version bump rules"
+        description = "Auto fix minor version bump rules"
         classpath = minorVersionBumpKtlint
         mainClass.set("com.pinterest.ktlint.Main")
         args = listOf("-F") + lintPaths
