@@ -59,7 +59,7 @@ dependencies {
         }
     }
 
-    ktlint(project(":ktlint-rules"))
+    ktlint(project(":ktlint:style-rules"))
 }
 
 val lintPaths = listOf(

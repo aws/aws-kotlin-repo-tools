@@ -20,4 +20,5 @@ dependencyResolutionManagement {
 include(":build-plugins:build-support")
 include(":build-plugins:kmp-conventions")
 include(":build-plugins:smithy-build")
-include(":ktlint-rules")
+include(":ktlint:style-rules")
+include(":ktlint:minor-version-rules")
