@@ -152,12 +152,6 @@ fun Project.configureCommon() {
 fun Project.configureJvm() {
     kotlin {
         jvm()
-
-        sourceSets.named("jvmTest") {
-            dependencies {
-                implementation(kotlin("test-junit5"))
-            }
-        }
     }
 
     tasks.named<Test>("jvmTest") {
@@ -168,7 +162,6 @@ fun Project.configureJvm() {
             showExceptions = true
             exceptionFormat = TestExceptionFormat.FULL
         }
-        useJUnitPlatform()
     }
 }
 

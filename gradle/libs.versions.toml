@@ -7,7 +7,6 @@ jreleaser-plugin-version = "1.18.0"
 publish-plugin-version = "1.3.1"
 smithy-version = "1.60.2"
 smithy-gradle-plugin-version = "1.3.0"
-junit-version = "5.10.1"
 coroutines-version = "1.10.2"
 
 [libraries]
@@ -20,7 +19,6 @@ nexus-publish-plugin = { module = "io.github.gradle-nexus:publish-plugin", versi
 jreleaser-plugin = { module = "org.jreleaser:jreleaser-gradle-plugin", version.ref = "jreleaser-plugin-version" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
 smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-base", version.ref = "smithy-gradle-plugin-version" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-version" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-version" }
 
 [plugins]
