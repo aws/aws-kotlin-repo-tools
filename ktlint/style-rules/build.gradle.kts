@@ -19,12 +19,6 @@ kotlin {
                 implementation(libs.ktlint.cli.ruleset.core)
             }
         }
-
-        test {
-            dependencies {
-                implementation(libs.ktlint.test)
-            }
-        }
     }
 }
 
