@@ -19,8 +19,7 @@ internal fun deprecatedUntilVersionRegex(major: Int, minor: Int): Regex =
     )
 
 /**
- * Creates a ktlint rule that detects APIs annotated with @DeprecatedUntilVersion for the specified versions.
- * If autocorrect is enabled, the API will be deleted.
+ * Creates a ktlint rule that detects APIs annotated with @DeprecatedUntilVersion for the upcoming minor version.
  */
 class DeprecatedApiRule : Rule(RuleId("minor-version-strategy-rules:deprecated-apis"), About()) {
     override fun beforeVisitChildNodes(
