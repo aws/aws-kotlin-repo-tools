@@ -1,3 +1,8 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package software.aws.ktlint.rules
 
 import com.pinterest.ktlint.rule.engine.api.Code
@@ -32,8 +37,8 @@ class DeprecatedUntilVersionRuleTest {
                 @DeprecatedUntilVersion(1, 2)
                 @Deprecated
                 class Foo {}
-            """.trimIndent(),
-            )
+                """.trimIndent(),
+            ),
         )
 
         assertEquals(
@@ -43,8 +48,18 @@ class DeprecatedUntilVersionRuleTest {
                 @Deprecated
                 @DeprecatedUntilVersion(1, 2)
                 class Foo {}
-            """.trimIndent(),
-            )
+                """.trimIndent(),
+            ),
+        )
+
+        assertEquals(
+            false,
+            hasLintingErrors(
+                """
+                @Deprecated
+                class Foo {}
+                """.trimIndent(),
+            ),
         )
 
         assertEquals(
@@ -53,8 +68,8 @@ class DeprecatedUntilVersionRuleTest {
                 """
                 @DeprecatedUntilVersion(1, 2)
                 class Foo {}
-            """.trimIndent(),
-            )
+                """.trimIndent(),
+            ),
         )
 
         assertEquals(
@@ -66,8 +81,8 @@ class DeprecatedUntilVersionRuleTest {
                 
                 @Deprecated
                 class Bar {}
-            """.trimIndent(),
-            )
+                """.trimIndent(),
+            ),
         )
 
         assertEquals(
@@ -79,8 +94,8 @@ class DeprecatedUntilVersionRuleTest {
                 
                 @DeprecatedUntilVersion(1, 2)
                 class Bar {}
-            """.trimIndent(),
-            )
+                """.trimIndent(),
+            ),
         )
     }
 }

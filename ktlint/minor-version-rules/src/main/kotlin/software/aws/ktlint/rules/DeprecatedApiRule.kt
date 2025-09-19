@@ -23,7 +23,7 @@ internal fun deprecatedUntilVersionRegex(major: Int, minor: Int): Regex =
 /**
  * Creates a ktlint rule that detects APIs annotated with @DeprecatedUntilVersion for the upcoming minor version.
  */
-class DeprecatedApiRule : Rule(RuleId("$ruleSetId:deprecated-apis"), About()) {
+class DeprecatedApiRule : Rule(RuleId("$RULE_SET:deprecated-apis"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,
