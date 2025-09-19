@@ -8,7 +8,9 @@ import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 
-class MinorVersionRuleSetProvider : RuleSetProviderV3(RuleSetId("minor-version-strategy-rules")) {
+internal const val ruleSetId = "aws-kotlin-repo-tools-rules"
+
+class MinorVersionRuleSetProvider : RuleSetProviderV3(RuleSetId(ruleSetId)) {
     override fun getRuleProviders() = setOf(
         RuleProvider { DeprecatedApiRule() },
     )

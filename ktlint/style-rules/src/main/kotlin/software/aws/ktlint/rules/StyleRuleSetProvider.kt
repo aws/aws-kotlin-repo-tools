@@ -8,10 +8,13 @@ import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 
-class StyleRuleSetProvider : RuleSetProviderV3(RuleSetId("aws-kotlin-repo-tools-rules")) {
+internal const val ruleSetId = "aws-kotlin-repo-tools-rules"
+
+class StyleRuleSetProvider : RuleSetProviderV3(RuleSetId(ruleSetId)) {
     override fun getRuleProviders() = setOf(
         RuleProvider { CopyrightHeaderRule() },
         RuleProvider { ExpressionBodyRule() },
         RuleProvider { MultilineIfElseBlockRule() },
+        RuleProvider { DeprecatedUntilVersionRule() },
     )
 }

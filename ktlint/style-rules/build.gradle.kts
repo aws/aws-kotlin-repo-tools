@@ -19,6 +19,23 @@ kotlin {
                 implementation(libs.ktlint.cli.ruleset.core)
             }
         }
+        test {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.ktlint.rule.engine)
+                implementation(libs.slf4j.simple) // Required by ktlint rule engine tests
+            }
+        }
+    }
+}
+
+tasks.test {
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        showStackTraces = true
+        showExceptions = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }
 
