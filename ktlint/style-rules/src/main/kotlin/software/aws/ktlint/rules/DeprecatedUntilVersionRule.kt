@@ -21,7 +21,7 @@ class DeprecatedUntilVersionRule : Rule(RuleId("$RULE_SET:deprecated-until-versi
     ) {
         if (node.elementType == ElementType.MODIFIER_LIST) {
             val annotations = node.getChildren(null).filter { it.elementType == ElementType.ANNOTATION_ENTRY }
-            val deprecated = annotations.any { it.text.startsWith("@Deprecated") }
+            val deprecated = annotations.any { it.text.startsWith("@Deprecated") && !it.text.contains("@DeprecatedUntilVersion") }
             val deprecatedUntilVersion = annotations.any { it.text.startsWith("@DeprecatedUntilVersion") }
 
             if (deprecatedUntilVersion && !deprecated) {
