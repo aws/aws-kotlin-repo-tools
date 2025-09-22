@@ -360,8 +360,14 @@ fun Project.configureJReleaser() {
                         artifacts {
                             artifactOverride {
                                 artifactId = "version-catalog"
-                                jar = false // Version catalogs don't produce a JAR
-                                verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
+
+                                // Version catalogs don't produce JARs
+                                jar = false
+                                sourceJar = false
+                                javadocJar = false
+
+                                // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
+                                verifyPom = false
                             }
                             gradle.projectsEvaluated {
                                 nativeArtifactIds.get().forEach { artifactIdWithoutPlatform ->
