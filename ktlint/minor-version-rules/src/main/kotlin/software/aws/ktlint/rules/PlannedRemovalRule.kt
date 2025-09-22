@@ -13,17 +13,17 @@ import java.io.File
 import java.util.Properties
 
 /**
- * Matches @DeprecatedUntilVersion with either named args (major=x, minor=y) or positional args (x, y)
+ * Matches @PlannedRemoval with either named args (major=x, minor=y) or positional args (x, y)
  */
-internal fun deprecatedUntilVersionRegex(major: Int, minor: Int): Regex =
+internal fun plannedRemovalRegex(major: Int, minor: Int): Regex =
     Regex(
-        """@DeprecatedUntilVersion\s*\(\s*(?:major\s*=\s*$major\s*,\s*minor\s*=\s*$minor\s*|\s*$major\s*,\s*$minor\s*)\s*\)""",
+        """@PlannedRemoval\s*\(\s*(?:major\s*=\s*$major\s*,\s*minor\s*=\s*$minor\s*|\s*$major\s*,\s*$minor\s*)\s*\)""",
     )
 
 /**
- * Creates a ktlint rule that detects APIs annotated with @DeprecatedUntilVersion for the upcoming minor version.
+ * Creates a ktlint rule that detects APIs annotated with @PlannedRemoval for the upcoming minor version.
  */
-class DeprecatedApiRule : Rule(RuleId("$RULE_SET:deprecated-apis"), About()) {
+class PlannedRemovalRule : Rule(RuleId("$RULE_SET:planned-removal"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,
@@ -38,11 +38,11 @@ class DeprecatedApiRule : Rule(RuleId("$RULE_SET:deprecated-apis"), About()) {
             val majorVersion = sdkVersion[0].toInt()
             val minorVersion = sdkVersion[1].toInt()
 
-            val regex = deprecatedUntilVersionRegex(majorVersion, minorVersion + 1)
+            val regex = plannedRemovalRegex(majorVersion, minorVersion + 1)
             if (regex.containsMatchIn(node.text)) {
                 emit(
                     node.startOffset,
-                    "The deprecated API is scheduled for removal, please remove it before releasing the next minor version.",
+                    "API is scheduled for removal, remove it before releasing the next minor version.",
                     false,
                 )
             }

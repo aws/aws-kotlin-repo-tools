@@ -12,6 +12,6 @@ internal const val RULE_SET = "minor-version-strategy-rules"
 
 class MinorVersionRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET)) {
     override fun getRuleProviders() = setOf(
-        RuleProvider { DeprecatedApiRule() },
+        RuleProvider { PlannedRemovalRule() },
     )
 }
