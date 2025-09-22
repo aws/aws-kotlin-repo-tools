@@ -72,6 +72,7 @@ internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
 // Group names which are allowed to publish K/N artifacts
 private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
     "aws.sdk.kotlin.crt",
+    "aws.smithy.kotlin",
 )
 
 // Optional override to the above set.
