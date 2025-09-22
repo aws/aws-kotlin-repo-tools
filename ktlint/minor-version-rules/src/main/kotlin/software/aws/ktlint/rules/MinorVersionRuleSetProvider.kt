@@ -8,8 +8,10 @@ import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 
-class MinorVersionRuleSetProvider : RuleSetProviderV3(RuleSetId("minor-version-strategy-rules")) {
+internal const val RULE_SET = "minor-version-strategy-rules"
+
+class MinorVersionRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET)) {
     override fun getRuleProviders() = setOf(
-        RuleProvider { DeprecatedApiRule() },
+        RuleProvider { PlannedRemovalRule() },
     )
 }
