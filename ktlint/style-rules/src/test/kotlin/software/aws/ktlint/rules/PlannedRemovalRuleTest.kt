@@ -11,10 +11,10 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class DeprecatedUntilVersionRuleTest {
+class PlannedRemovalRuleTest {
     val ruleEngine = KtLintRuleEngine(
         setOf(
-            RuleProvider { DeprecatedUntilVersionRule() },
+            RuleProvider { PlannedRemovalRule() },
         ),
     )
 
@@ -34,7 +34,7 @@ class DeprecatedUntilVersionRuleTest {
             false,
             hasLintingErrors(
                 """
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 @Deprecated
                 class Foo {}
                 """.trimIndent(),
@@ -46,7 +46,7 @@ class DeprecatedUntilVersionRuleTest {
             hasLintingErrors(
                 """
                 @Deprecated
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 class Foo {}
                 """.trimIndent(),
             ),
@@ -66,7 +66,7 @@ class DeprecatedUntilVersionRuleTest {
             true,
             hasLintingErrors(
                 """
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 class Foo {}
                 """.trimIndent(),
             ),
@@ -76,7 +76,7 @@ class DeprecatedUntilVersionRuleTest {
             true,
             hasLintingErrors(
                 """
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 class Foo {}
                 
                 @Deprecated
@@ -89,10 +89,10 @@ class DeprecatedUntilVersionRuleTest {
             true,
             hasLintingErrors(
                 """
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 class Foo {}
                 
-                @DeprecatedUntilVersion(1, 2)
+                @PlannedRemoval(1, 2)
                 class Bar {}
                 """.trimIndent(),
             ),

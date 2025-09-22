@@ -11,9 +11,9 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /**
- * Creates a ktlint rule that forces APIs annotated with @DeprecatedUntilVersion to also be annotated with @Deprecated.
+ * Creates a ktlint rule that forces APIs annotated with @PlannedRemoval to also be annotated with @Deprecated.
  */
-class DeprecatedUntilVersionRule : Rule(RuleId("$RULE_SET:deprecated-until-version"), About()) {
+class PlannedRemovalRule : Rule(RuleId("$RULE_SET:planned-removal"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,
@@ -21,13 +21,13 @@ class DeprecatedUntilVersionRule : Rule(RuleId("$RULE_SET:deprecated-until-versi
     ) {
         if (node.elementType == ElementType.MODIFIER_LIST) {
             val annotations = node.getChildren(null).filter { it.elementType == ElementType.ANNOTATION_ENTRY }
-            val deprecated = annotations.any { it.text.startsWith("@Deprecated") && !it.text.contains("@DeprecatedUntilVersion") }
-            val deprecatedUntilVersion = annotations.any { it.text.startsWith("@DeprecatedUntilVersion") }
+            val deprecated = annotations.any { it.text.startsWith("@Deprecated") }
+            val plannedRemoval = annotations.any { it.text.startsWith("@PlannedRemoval") }
 
-            if (deprecatedUntilVersion && !deprecated) {
+            if (plannedRemoval && !deprecated) {
                 emit(
                     node.startOffset,
-                    "APIs annotated with @DeprecatedUntilVersion must also be annotated with @Deprecated",
+                    "APIs annotated with @PlannedRemoval must also be annotated with @Deprecated",
                     false,
                 )
             }

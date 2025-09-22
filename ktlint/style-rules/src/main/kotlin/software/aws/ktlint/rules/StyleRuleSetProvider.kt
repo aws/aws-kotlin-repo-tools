@@ -15,6 +15,6 @@ class StyleRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET)) {
         RuleProvider { CopyrightHeaderRule() },
         RuleProvider { ExpressionBodyRule() },
         RuleProvider { MultilineIfElseBlockRule() },
-        RuleProvider { DeprecatedUntilVersionRule() },
+        RuleProvider { PlannedRemovalRule() },
     )
 }
