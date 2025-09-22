@@ -9,6 +9,8 @@ on:
       - 'feat-*'
   workflow_dispatch:
 
+permissions: { }
+
 env:
   PACKAGE_NAME: aws-kotlin-repo-tools
   RUN: ${{ github.run_id }}-${{ github.run_number }}
