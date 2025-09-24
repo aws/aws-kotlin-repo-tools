@@ -9,7 +9,9 @@ on:
       - 'feat-*'
   workflow_dispatch:
 
-permissions: { }
+permissions:
+  id-token: write
+  contents: read
 
 env:
   PACKAGE_NAME: aws-kotlin-repo-tools
@@ -59,7 +61,7 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+        role-to-assume: arn:aws:iam::934480575838:role/aws-sdk-kotlin-pr-github-oidc-role
         aws-region: us-west-2
     - name: Setup Kat
       uses: ./.github/actions/setup-kat
@@ -94,7 +96,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::934480575838:role/aws-sdk-kotlin-pr-github-oidc-role
           aws-region: us-west-2
       - name: Setup Kat
         uses: ./.github/actions/setup-kat
