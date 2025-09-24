@@ -46,7 +46,6 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.test {
-    useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true
