@@ -31,6 +31,14 @@ jobs:
         java-version: 17
         cache: 'gradle'
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::934480575838:role/aws-sdk-kotlin-pr-github-oidc-role
+        aws-region: us-west-2
+    - name: Setup Kat
+      uses: ./.github/actions/setup-kat
+
     - uses: actions/cache@v4
       with:
         path: |
