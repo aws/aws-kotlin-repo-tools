@@ -56,6 +56,14 @@ jobs:
         java-version: 17
         cache: 'gradle'
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+        aws-region: us-west-2
+    - name: Setup Kat
+      uses: ./.github/actions/setup-kat
+
     - uses: actions/cache@v4
       with:
         path: |
@@ -82,6 +90,14 @@ jobs:
           distribution: 'corretto'
           java-version: 17
           cache: 'gradle'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Setup Kat
+        uses: ./.github/actions/setup-kat
 
       - name: Configure Gradle
         uses: ./.github/actions/configure-gradle
