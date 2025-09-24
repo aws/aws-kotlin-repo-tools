@@ -365,10 +365,21 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
-                        active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
-                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
+                        active = Active.ALWAYS // the MavenDeployer default is ALWAYS, but MavenCentralDeployer is NEVER
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
+
+                        maxRetries = 100
+                        retryDelay = 60 // seconds
+                        snapshotSupported = false // do not allow publication of snapshot artifacts
+                        applyMavenCentralRules = true
+                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
+                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
+                        checksums = true
+                        sourceJar = true
+                        javadocJar = true
+                        verifyPom = true
+
                         artifacts {
                             artifactOverride {
                                 artifactId = "version-catalog"
@@ -395,16 +406,6 @@ fun Project.configureJReleaser() {
                                 }
                             }
                         }
-                        maxRetries = 100
-                        retryDelay = 60 // seconds
-                        snapshotSupported = false // do not allow publication of snapshot artifacts
-                        applyMavenCentralRules = true
-                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
-                        sign = true
-                        checksums = true
-                        sourceJar = true
-                        javadocJar = true
-                        verifyPom = true
                     }
                 }
             }
