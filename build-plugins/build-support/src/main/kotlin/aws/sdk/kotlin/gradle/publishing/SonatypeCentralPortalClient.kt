@@ -5,18 +5,18 @@
 
 package aws.sdk.kotlin.gradle.publishing
 
-import java.io.File
-import java.util.Base64
-import java.time.Duration
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.time.ExperimentalTime
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import java.io.File
+import java.time.Duration
+import java.util.Base64
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * A client used for interacting with the Sonatype Publish Portal API
@@ -30,7 +30,10 @@ class SonatypeCentralPortalClient(
         .writeTimeout(Duration.ofSeconds(60))
         .retryOnConnectionFailure(true)
         .build(),
-    private val json: Json = Json { ignoreUnknownKeys = true; prettyPrint = true }
+    private val json: Json = Json {
+        ignoreUnknownKeys = true
+        prettyPrint = true
+    },
 ) {
     companion object {
         const val CENTRAL_PORTAL_USERNAME = "SONATYPE_CENTRAL_PORTAL_USERNAME"
@@ -127,7 +130,7 @@ class SonatypeCentralPortalClient(
         terminalStates: Set<String>,
         pollInterval: kotlin.time.Duration,
         timeout: kotlin.time.Duration,
-        onStateChange: (old: String?, new: String) -> Unit = { _, _ -> }
+        onStateChange: (old: String?, new: String) -> Unit = { _, _ -> },
     ): StatusResponse {
         val deadline = Clock.System.now() + timeout
         var lastState: String? = null

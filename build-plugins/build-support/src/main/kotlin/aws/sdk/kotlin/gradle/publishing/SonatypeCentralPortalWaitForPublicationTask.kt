@@ -1,3 +1,8 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package aws.sdk.kotlin.gradle.publishing
 
 import org.gradle.api.DefaultTask
@@ -14,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
  * Waits for a given deploymentId to enter the PUBLISHED state
  * https://central.sonatype.org/publish/publish-portal-api/
  */
-abstract class SonatypeCentralPortalWaitForPublicationTask: DefaultTask() {
+abstract class SonatypeCentralPortalWaitForPublicationTask : DefaultTask() {
     @get:Input
     abstract val deploymentId: Property<String>
 
@@ -47,7 +52,7 @@ abstract class SonatypeCentralPortalWaitForPublicationTask: DefaultTask() {
             deploymentId,
             setOf("PUBLISHED", "FAILED"),
             pollInterval.get(),
-            timeoutDuration.get()
+            timeoutDuration.get(),
         ) { _, newState ->
             logger.lifecycle("📡 Status: $newState (deploymentId=$deploymentId)")
         }

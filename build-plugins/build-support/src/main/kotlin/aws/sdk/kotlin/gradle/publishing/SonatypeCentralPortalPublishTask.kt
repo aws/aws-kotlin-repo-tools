@@ -1,3 +1,8 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package aws.sdk.kotlin.gradle.publishing
 
 import org.gradle.api.DefaultTask
@@ -5,11 +10,11 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Publishes a bundle to Sonatype Portal and waits for completion.
+ * Publishes a bundle to Sonatype Portal and waits for it to be validated (but not fully published).
  * States: PENDING, VALIDATING, VALIDATED, FAILED
  * https://central.sonatype.org/publish/publish-portal-api/
  */
