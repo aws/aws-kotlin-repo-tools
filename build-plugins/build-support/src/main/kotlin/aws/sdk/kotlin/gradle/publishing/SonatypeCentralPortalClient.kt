@@ -45,7 +45,6 @@ class SonatypeCentralPortalClient(
             return "Bearer $b64"
         }
 
-        /** Helper to create a client using env vars for creds. */
         fun fromEnvironment(): SonatypeCentralPortalClient {
             val user = System.getenv(CENTRAL_PORTAL_USERNAME)?.takeIf { it.isNotBlank() } ?: error("$CENTRAL_PORTAL_USERNAME not configured")
             val pass = System.getenv(CENTRAL_PORTAL_PASSWORD)?.takeIf { it.isNotBlank() } ?: error("$CENTRAL_PORTAL_PASSWORD not configured")
