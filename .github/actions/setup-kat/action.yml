@@ -5,10 +5,23 @@ description: >
 runs:
   using: composite
   steps:
-    - name: Install AWS CLI
+    - name: Install AWS CLI (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo snap install aws-cli --classic
+    - name: Install AWS CLI (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+        sudo installer -pkg AWSCLIV2.pkg -target /
+    - name: Install AWS CLI (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        Invoke-WebRequest -Uri "https://awscli.amazonaws.com/AWSCLIV2.msi" -OutFile "AWSCLIV2.msi"
+        Start-Process msiexec.exe -Wait -ArgumentList '/I AWSCLIV2.msi /quiet'
     - name: Set up kat
       shell: bash
       run: |
