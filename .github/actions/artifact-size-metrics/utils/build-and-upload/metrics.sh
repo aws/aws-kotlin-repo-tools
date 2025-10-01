@@ -1,6 +1,9 @@
 # Gets artifact size metrics from staging dir
 getArtifactSizes() {
+  # Create output file
   output="build/reports/metrics/artifact-size-metrics.csv"
+  mkdir -p "$(dirname "$output")"
+  touch "$output"
 
   # Write CSV header
   echo "Jar File,Size (Bytes)" > "$output"
