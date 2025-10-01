@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source ./metrics.sh
-source ./cloudwatch.sh
-source ../s3.sh
-source ../setup.sh
+source "$(dirname "$0")/metrics.sh"
+source "$(dirname "$0")/cloudwatch.sh"
+source "$(dirname "$0")/../s3.sh"
+source "$(dirname "$0")/../setup.sh"
 
 setup
 
