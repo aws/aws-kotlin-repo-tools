@@ -19,7 +19,6 @@ repositories {
 dependencies {
     implementation(project(":build-plugins:build-support"))
     compileOnly(kotlin("gradle-plugin", "2.1.0"))
-    testImplementation(libs.junit.jupiter)
 }
 
 gradlePlugin {
@@ -43,8 +42,4 @@ tasks.withType<KotlinCompile> {
 tasks.withType<JavaCompile> {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
     targetCompatibility = JavaVersion.VERSION_1_8.toString()
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
