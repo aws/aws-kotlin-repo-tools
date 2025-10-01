@@ -24,7 +24,7 @@ abstract class SonatypeCentralPortalWaitForPublicationTask : DefaultTask() {
     abstract val deploymentId: Property<String>
 
     @Option(option = "deploymentId", description = "Deployment ID to wait for")
-    fun setDeploymentId(id: String) {
+    fun setDeploymentIdFromOption(id: String) {
         deploymentId.set(id)
     }
 
