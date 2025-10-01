@@ -1,25 +1,31 @@
-name: Artifact Size Metrics - Show Results
-description: Posts a new artifact analysis comment on the PR
+name: Download and process artifact size metrics
+description: TODO
+
 inputs:
-  working-directory:
-    required: false
-    description: The working directory to use for reading the previously-generated report.
-    default: ''
+  download:
+    description: TODO
+    default: "false"
+    # TODO: Additional inputs
+
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - name: Post Artifact Analysis Comment
+    - name: Download and process artifact size metrics
+      shell: bash
+      run: |
+        chmod +x ./src/main.sh
+        chmod +x ./src/s3.sh
+        chmod +x ./src/compare.sh
+        chmod +x ./src/comment.sh
+        
+        ./src/main.sh
+
+    - name: Post artifact analysis comment # TODO: MOVE TO SCRIPT IF POSSIBLE
       uses: actions/github-script@v7
       with:
         script: |
-          const workingDirectory = '${{ inputs.working-directory }}'
-          if (workingDirectory) {
-            process.chdir(workingDirectory)
-          }
-
           const fs = require('node:fs')
-          const prNumber = context.issue.number ?? process.env.SDK_PR
-
+          const prNumber = context.issue.number ?? process.env.SDK_PR # TOSO - CHANGE - THIS WON'T WORK FOR EXTERNAL CONTRIBUTORS BTW - IF EXTERNAL CONTRIBUTOR JUST FAIL
           const prInfo = await github.rest.pulls.get({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -84,3 +90,13 @@ runs:
               }
             }`)
           }
+
+    - name: Fail if large size increase
+      shell: bash
+      if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-artifact-size-increase') }}
+      run: |
+        if [ "$LARGE_DIFF" == "true" ]; then
+            echo An artifact increased in size by more than allowed or a new artifact was created.
+            echo If this is expected please add the 'acknowledge-artifact-size-increase' label to this pull request.
+            exit 1
+        fi

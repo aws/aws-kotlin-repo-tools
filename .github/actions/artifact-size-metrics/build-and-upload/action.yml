@@ -1,0 +1,24 @@
+name: Calculate Artifact Size
+description: Calculates size for JVM artifacts
+
+inputs:
+  artifact-dirs:
+    description: List of directories for which artifact sizes will be calculated
+    required: true
+    # TODO: Additional inputs
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Calculate artifact sizes
+      shell: bash
+      run: |
+        chmod +x ./src/main.sh
+        chmod +x ./src/metrics.sh
+        chmod +x ./src/s3.sh
+        chmod +x ./src/cloudwatch.sh
+        
+        ./src/main.sh
