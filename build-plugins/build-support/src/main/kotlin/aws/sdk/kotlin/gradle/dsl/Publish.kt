@@ -32,6 +32,7 @@ private const val SIGNING_PASSWORD_PROP = "signingPassword"
 private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
 private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 
+// TODO Remove JReleaser environment variables when smithy-kotlin + aws-crt-kotlin are migrated to custom Sonatype integration
 private object EnvironmentVariables {
     const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
     const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
@@ -41,6 +42,9 @@ private object EnvironmentVariables {
     const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
     const val GENERIC_TOKEN = "JRELEASER_GENERIC_TOKEN"
 }
+
+private const val SIGNING_PUBLIC_KEY = "SIGNING_KEY"
+private const val SIGNING_SECRET_KEY = "SIGNING_PASSWORD"
 
 internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
@@ -240,8 +244,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+        val secretKey = System.getenv(SIGNING_PUBLIC_KEY)
+        val passphrase = System.getenv(SIGNING_SECRET_KEY)
 
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
@@ -255,6 +259,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             tasks.withType<AbstractPublishToMaven>().configureEach {
                 mustRunAfter(signingTasks)
             }
+        } else {
+            logger.info("Skipping signing configuration, $SIGNING_PUBLIC_KEY or $SIGNING_SECRET_KEY are not set")
         }
     }
 
