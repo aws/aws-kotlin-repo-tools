@@ -19,6 +19,8 @@ import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import java.time.Duration
 
+// FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
+
 private object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
