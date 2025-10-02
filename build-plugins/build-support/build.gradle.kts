@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     kotlin("jvm")
+    kotlin("plugin.serialization") version embeddedKotlinVersion
     `java-gradle-plugin`
 }
 
