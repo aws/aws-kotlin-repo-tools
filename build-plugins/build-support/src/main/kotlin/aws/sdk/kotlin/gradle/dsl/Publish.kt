@@ -79,6 +79,7 @@ internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
 private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
     "aws.sdk.kotlin.crt",
     "aws.smithy.kotlin",
+    "com.sonatype.central.testing.amazon",
 )
 
 // Optional override to the above set.
