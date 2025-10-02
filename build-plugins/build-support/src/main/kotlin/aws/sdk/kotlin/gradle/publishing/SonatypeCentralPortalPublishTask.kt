@@ -9,6 +9,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.options.Option
+import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -21,6 +24,12 @@ import kotlin.time.Duration.Companion.seconds
 abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
     @get:InputFile
     abstract val bundle: RegularFileProperty
+
+    @Option(option = "bundle", description = "Path to bundle")
+    fun setBundleFromOption(path: String) {
+        check(Path(path).exists()) { "Bundle not found at $path" }
+        bundle.set(Path(path).toFile())
+    }
 
     /** Max time to wait for final state. */
     @get:Input
