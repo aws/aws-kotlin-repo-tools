@@ -12,6 +12,8 @@ getArtifactSizes() {
   # TODO: Calculate KN artifacts sizes
   find build/m2 -type f -name "*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read -r jar; do
       size=$(stat -c%s "$jar")
-      echo "\"$jar\",$size" >> "$output"
+      # strip "-<version>(-timestamp?)" before ".jar"
+      artifact=$(echo "$jar" | sed -E 's/-[0-9]+(\.[0-9]+)*(-[0-9]{8}\.[0-9]{6}-[0-9]+)?\.jar$/.jar/')
+      echo "\"$artifact\",$size" >> "$output"
   done
 }
