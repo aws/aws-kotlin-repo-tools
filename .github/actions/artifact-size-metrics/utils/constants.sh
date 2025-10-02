@@ -8,4 +8,3 @@ latest_release_metrics_file="build/reports/metrics/latest-release-artifact-size-
 
 # Where the metrics comparison results are stored
 metrics_comparison_file="build/reports/metrics/comparison.md"
-
