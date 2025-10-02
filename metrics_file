@@ -1,0 +1,20 @@
+Artifact, Size (Bytes)
+aws-core, 647
+hll-mapping-core, 647
+lambda-jvm, 3851286
+aws-endpoint-jvm, 10966
+hll-codegen, 120718
+aws-core-jvm, 5980
+style-rules, 13183
+kmp-conventions, 30972
+ktlint-rules, 9590
+minor-version-rules, 6399
+smithy-build, 38428
+build-support, 162657
+aws-http, 647
+lambda, 647
+aws-endpoint, 647
+aws-config, 647
+aws-config-jvm, 1044789
+aws-http-jvm, 73207
+hll-mapping-core-jvm, 38175

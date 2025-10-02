@@ -18,20 +18,21 @@ fi
 # Move artifacts that will be published to staging dir (build/m2)
 ./gradlew publish
 
-# Calculate size for artifacts in staging dir
-getArtifactSizes
+# Calculate size for artifacts in staging dir (build/m2)
+metrics_file="build/reports/metrics/artifact-size-metrics.csv"
+getArtifactSizes metrics_file
 
 # Upload size metrics
 if [ "$UPLOAD" == "true" ]; then
   if [ "$RELEASE_METRICS" == "true" ]; then
     # For record-keeping
-    uploadToS3 "$GITHUB_REPOSITORY"-v"$IDENTIFIER".csv
-    uploadToS3 "$GITHUB_REPOSITORY"-latest.csv
+    uploadToS3 "$metrics_file" "$GITHUB_REPOSITORY"-v"$IDENTIFIER".csv
+    uploadToS3 "$metrics_file" "$GITHUB_REPOSITORY"-latest.csv
 
     # For display in our OPS dashboard
-    uploadToCloudwatch "$GITHUB_REPOSITORY"
+    uploadToCloudwatch "$metrics_file" "$GITHUB_REPOSITORY"
   else
     # For downstream consumption in pull requests
-    uploadToS3 [TEMP]"$GITHUB_REPOSITORY"-pull-request-"$IDENTIFIER".csv
+    uploadToS3 "$metrics_file" [TEMP]"$GITHUB_REPOSITORY"-pull-request-"$IDENTIFIER".csv
   fi
 fi
