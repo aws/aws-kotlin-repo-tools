@@ -20,7 +20,7 @@ fi
 
 # Calculate size for artifacts in staging dir (build/m2)
 metrics_file="build/reports/metrics/artifact-size-metrics.csv"
-getArtifactSizes metrics_file
+getArtifactSizes $metrics_file
 
 # Upload size metrics
 if [ "$UPLOAD" == "true" ]; then
