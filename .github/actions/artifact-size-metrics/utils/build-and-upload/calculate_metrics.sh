@@ -1,9 +1,9 @@
 # Gets artifact size metrics from staging dir
-getArtifactSizes() {
+calculateArtifactSizes() {
   # Artifact staging dir
   input_dir="build/m2"
 
-  # Create output_file file
+  # Create output_file
   output_file="$1"
   mkdir -p "$(dirname "$output_file")"
   touch "$output_file"
@@ -21,7 +21,7 @@ getArtifactSizes() {
       artifact=$(basename "$jar")
       artifact=$(echo "$artifact" | sed -E 's/-[0-9].*\.jar$//')
 
-      # Add JAR to CSV
+      # Add artifact size to CSV
       echo "$artifact, $size" >> "$output_file"
   done
 

@@ -8,7 +8,7 @@ uploadToCloudwatch() {
       # Skip header
       [[ "$artifactName" == "Artifact" ]] && continue
 
-      # trim spaces
+      # Trim spaces
       artifactName=$(echo "$artifactName" | xargs)
       artifactSize=$(echo "$artifactSize" | xargs)
 
