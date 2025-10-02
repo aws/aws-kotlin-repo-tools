@@ -2,19 +2,21 @@ name: Calculate Artifact Size
 description: Calculates size for JVM artifacts
 
 inputs:
-  artifact-dirs:
-    description: List of directories for which artifact sizes will be calculated
-    required: true
-    # TODO: Additional inputs
+  upload:
+    description: Whether the metrics should be uploaded to S3/Cloudwatch
+  release_metrics:
+    description: Whether the metrics are coming from a release build
 
 runs:
   using: composite
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
     - name: Calculate artifact sizes
       shell: bash
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        IDENTIFIER: ${{ github.ref_name }}
+        UPLOAD: ${{ inputs.upload }}
+        RELEASE_METRICS: ${{ inputs.release_metrics }}
       run: |
-        chmod +x ./src/main.sh
-        ./src/main.sh
+        chmod +x ../utils/build-and-upload/main.sh
+        ../utils/build-and-upload/main.sh
