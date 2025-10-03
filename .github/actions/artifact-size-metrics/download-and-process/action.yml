@@ -4,6 +4,7 @@ description: Compares artifact size metrics, leaves a comment, and fails if a si
 inputs:
   download:
     description: Whether the artifact size metrics should be downloaded from S3
+    type: boolean
 
 runs:
   using: composite
