@@ -55,10 +55,10 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         val deploymentId = client.uploadBundle(file, file.name)
         logger.lifecycle("📤 Uploaded bundle; deploymentId=$deploymentId")
 
-        // 2) Wait for VALIDATED or FAILED
+        // 2) Wait for PUBLISHING (which comes after VALIDATING) or FAILED
         val result = client.waitForStatus(
             deploymentId = deploymentId,
-            terminalStates = setOf("VALIDATED", "FAILED"),
+            terminalStates = setOf("PUBLISHING", "FAILED"),
             pollInterval = pollInterval.get(),
             timeout = timeoutDuration.get(),
         ) { _, new ->
@@ -67,7 +67,7 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
 
         // 3) Evaluate
         when (result.deploymentState) {
-            "VALIDATED" -> logger.lifecycle("✅ Bundle validated by Maven Central")
+            "PUBLISHING" -> logger.lifecycle("✅ Bundle validated by Maven Central")
             "FAILED" -> {
                 val reasons = result.errors?.values?.joinToString("\n- ", prefix = "\n- ")
                     ?: "\n(no error details returned)"
