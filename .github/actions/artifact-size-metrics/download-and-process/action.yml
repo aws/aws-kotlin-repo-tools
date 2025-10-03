@@ -1,0 +1,67 @@
+name: Process artifact size metrics
+description: Compares artifact size metrics, leaves a comment, and fails if a size increase of ≥5% is detected.
+
+inputs:
+  download:
+    description: Whether the artifact size metrics should be downloaded from S3
+    type: boolean
+
+runs:
+  using: composite
+  steps:
+    - name: Download and process artifact size metrics
+      description: Compares artifact size metrics and sets LARGE_DIFF to true if a size increase of ≥5% is detected.
+      shell: bash
+      env:
+        DOWNLOAD: ${{ inputs.download }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        IDENTIFIER: ${{ github.ref_name }}
+      run: |
+        chmod +x ../utils/download-and-process/main.sh        
+        ../utils/download-and-process/main.sh
+
+    - name: Comment artifact size metrics comparison
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+           const fs = require('node:fs')
+
+          // Read the artifact size metrics comparison
+          const comparison = fs.readFileSync('build/reports/metrics/artifact-analysis.md', 'utf8')
+    
+          // Get PR ID
+          const { data: pullRequest } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          })
+          const pullRequestId = pullRequest.node_id
+    
+          // Add the comment
+          const addCommentResponse = await github.graphql(`
+            mutation {
+              addComment(input: {body: """${comparison}""", subjectId: "${pullRequestId}"}) {
+                commentEdge { node { id } }
+              }
+            }
+          `)
+    
+          const commentId = addCommentResponse.addComment.commentEdge.node.id
+    
+          // Minimize the comment
+          await github.graphql(`
+            mutation {
+              minimizeComment(input: {subjectId: "${commentId}", classifier: RESOLVED}) { }
+            }
+          `)
+
+    - name: Large size increase?
+      if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-artifact-size-increase') }}
+      shell: bash
+      run: |
+        if [ "$LARGE_DIFF" == "true" ]; then
+            echo "An artifact has increased in size by more than 5%.
+            If this is expected, please add the acknowledge-artifact-size-increase label to this pull request."
+            exit 1
+        fi
