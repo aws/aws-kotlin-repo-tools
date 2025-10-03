@@ -15,7 +15,6 @@ calculateArtifactSizes() {
   # TODO: Calculate KN artifacts sizes
   find "$input_dir" -type f -name "*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | while read -r jar; do
       size=$(stat -c%s "$jar")
-#      size=$(stat -f%z "$jar")  # TODO: Remove when done testing
 
       # remove dir path, version, optional timestamp, and .jar
       artifact=$(basename "$jar")

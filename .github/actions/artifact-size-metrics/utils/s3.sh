@@ -1,5 +1,5 @@
 # Owned by: aws-kotlin-sdk+ci
-S3_ARTIFACT_SIZE_METRICS_BUCKET="artifact-size-metrics-2" # TODO: Remove "-2" when done testing
+S3_ARTIFACT_SIZE_METRICS_BUCKET="artifact-size-metrics"
 
 # Uploads metrics to the metrics bucket under the specified file name
 uploadToMetricsBucket() {
