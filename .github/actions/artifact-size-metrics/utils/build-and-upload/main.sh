@@ -10,16 +10,15 @@ source "$(dirname "$0")/../setup.sh"
 
 setup
 
-# Build
+# Build and move artifacts that'll be published to staging dir (build/m2)
 if [ "$GITHUB_REPOSITORY" = "aws-sdk-kotlin" ]; then
     # FIXME: Enable K/N builds
     ./gradlew build -Paws.kotlin.native=false build --parallel --max-workers 16
+    ./gradlew -Paws.kotlin.native=false publish --parallel --max-workers 16
 else
     ./gradlew build
+    ./gradlew publish --parallel --max-workers 16
 fi
-
-# Move artifacts that'll be published to staging dir (build/m2)
-./gradlew publish --parallel --max-workers 16
 
 # Calculate size for artifacts in staging dir (build/m2) and save them to metrics_file
 calculateArtifactSizes "$metrics_file" # see: constants.sh
