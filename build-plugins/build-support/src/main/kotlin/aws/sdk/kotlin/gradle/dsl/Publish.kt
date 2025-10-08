@@ -436,7 +436,7 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
         // Standard publication
     } else if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
         // Kotlin/Native publication
-        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES) {
             println("Overriding K/N publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
         } else {
             shouldPublish = shouldPublish && publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES
