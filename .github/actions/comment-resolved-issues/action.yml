@@ -1,0 +1,40 @@
+name: 'Comment on Resolved Issues'
+description: 'Comments on issues referenced in PRs merged since last release'
+
+inputs:
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+    default: ${{ github.token }}
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Comment on issues
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
+  
+        # Convert tag date to GitHub search format
+        TAG_DATE=$(git log -1 --format="%ci" "$PREVIOUS_TAG" | sed 's/ /T/' | sed 's/ +0000/Z/')
+        echo "Using tag date: $TAG_DATE"
+        
+        # Find issue numbers from PRs created from the last release tag date
+        ISSUE_NUMBERS=$(gh pr list \
+          --json number,body,createdAt \
+          --jq '.[] | select(.createdAt > "'$TAG_DATE'") | .body' | \
+          grep -o 'issues/[0-9]*' | \
+          sed 's/issues\///'
+        )
+        
+        # Comment on each issue found
+        for issue_number in $ISSUE_NUMBERS; do 
+          echo "Commenting on issue #$issue_number"
+          gh issue comment "$issue_number" --body "This issue was resolved and included in the latest release." || echo "Failed to comment on #$issue_number"
+        done
