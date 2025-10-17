@@ -20,7 +20,8 @@ runs:
       run: |
         # Get the previous tag
         PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
-  
+        CURRENT_TAG=$(git tag --sort=-version:refname | sed -n '1p')
+
         # Convert tag date to GitHub search format
         TAG_DATE=$(git log -1 --format="%ci" "$PREVIOUS_TAG" | sed 's/ /T/' | sed 's/ +0000/Z/')
         echo "Using tag date: $TAG_DATE"
@@ -36,5 +37,5 @@ runs:
         # Comment on each issue found
         for issue_number in $ISSUE_NUMBERS; do 
           echo "Commenting on issue #$issue_number"
-          gh issue comment "$issue_number" --body "This issue was resolved and included in the latest release." || echo "Failed to comment on #$issue_number"
+          gh issue comment "$issue_number" --body "A change related to this issue was included in release: $CURRENT_TAG" || echo "Failed to comment on #$issue_number"
         done
