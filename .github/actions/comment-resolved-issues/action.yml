@@ -17,9 +17,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
-      run: |
-        set -e
-        
+      run: |       
         # Get the previous tag
         PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
         CURRENT_TAG=$(git tag --sort=-version:refname | sed -n '1p')
