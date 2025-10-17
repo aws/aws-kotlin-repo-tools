@@ -17,8 +17,6 @@ runs:
         GITHUB_REPOSITORY: ${{ github.repository }}
         IDENTIFIER: ${{ github.ref_name }}
       run: |
-        pwd
-        ls ../
         chmod +x $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh        
         $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh
 
