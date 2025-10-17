@@ -26,16 +26,38 @@ runs:
         TAG_DATE=$(git log -1 --format="%ci" "$PREVIOUS_TAG" | sed 's/ /T/' | sed 's/ +0000/Z/')
         echo "Using tag date: $TAG_DATE"
         
-        # Find issue numbers from PRs created from the last release tag date
-        ISSUE_NUMBERS=$(gh pr list \
-          --json number,body,createdAt \
-          --jq '.[] | select(.createdAt > "'$TAG_DATE'") | .body' | \
-          grep -o 'issues/[0-9]*' | \
-          sed 's/issues\///'
+        # Find all PRs merged from the last release tag date
+        ALL_PRS=$(gh pr list \
+          --state merged \
+          --json number,body,mergedAt \
+          --jq '[.[] | select(.mergedAt > "$TAG_DATE") | .number]' 
         )
         
+        # Find all issue number from PRs merged from the last release tag date
+        ISSUE_NUMBERS=""
+        for pr_number in $(echo "$ALL_PRS" | jq -r '.[]'); do
+        
+          # Get the merge commit SHA for this PR
+          MERGE_COMMIT=$(gh pr view "$pr_number" --json mergeCommit --jq '.mergeCommit.oid')
+        
+          # Check if this commit exists in the release branch
+          if git merge-base --is-ancestor "$MERGE_COMMIT" origin/release 2>/dev/null; then
+            echo "PR $pr_number is in release branch"
+        
+            # Get issue numbers from this PR
+            PR_ISSUES=$(gh pr view "$pr_number" --json body --jq '.body' | \
+              grep -o 'issues/[0-9]*' | \
+              sed 's/issues\///')
+            echo "  Found issues: $PR_ISSUES"
+        
+            ISSUE_NUMBERS="$ISSUE_NUMBERS $PR_ISSUES"
+          fi
+        done
+        
         # Comment on each issue found
-        for issue_number in $ISSUE_NUMBERS; do 
-          echo "Commenting on issue #$issue_number"
-          gh issue comment "$issue_number" --body "A change related to this issue was included in release: $CURRENT_TAG" || echo "Failed to comment on #$issue_number"
+        echo "$ISSUE_NUMBERS" | tr ' ' '\n' | while read -r issue_number; do
+          if [ -n "$issue_number" ]; then
+            echo "Commenting on issue #$issue_number"
+            gh issue comment "$issue_number" --body "A change related to this issue was included in release: $CURRENT_TAG" || echo "::error Failed to comment on #$issue_number"
+          fi
         done
