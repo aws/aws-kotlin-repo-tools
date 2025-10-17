@@ -9,8 +9,8 @@ inputs:
 runs:
   using: composite
   steps:
+    # Compares artifact size metrics and sets LARGE_DIFF to true if a size increase of ≥5% is detected.
     - name: Download and process artifact size metrics
-      description: Compares artifact size metrics and sets LARGE_DIFF to true if a size increase of ≥5% is detected.
       shell: bash
       env:
         DOWNLOAD: ${{ inputs.download }}
