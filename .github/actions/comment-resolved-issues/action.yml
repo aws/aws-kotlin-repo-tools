@@ -33,7 +33,7 @@ runs:
           --jq '[.[] | select(.mergedAt > "$TAG_DATE") | .number]' 
         )
         
-        # Find all issue number from PRs merged from the last release tag date
+        # Find all issue number from PRs merged into release branch
         ISSUE_NUMBERS=""
         for pr_number in $(echo "$ALL_PRS" | jq -r '.[]'); do
         
