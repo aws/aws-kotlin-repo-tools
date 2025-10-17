@@ -20,42 +20,6 @@ runs:
         chmod +x ../utils/download-and-process/main.sh        
         ../utils/download-and-process/main.sh
 
-    - name: Comment artifact size metrics comparison
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-           const fs = require('node:fs')
-
-          // Read the artifact size metrics comparison
-          const comparison = fs.readFileSync('build/reports/metrics/artifact-analysis.md', 'utf8')
-    
-          // Get PR ID
-          const { data: pullRequest } = await github.rest.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          })
-          const pullRequestId = pullRequest.node_id
-    
-          // Add the comment
-          const addCommentResponse = await github.graphql(`
-            mutation {
-              addComment(input: {body: """${comparison}""", subjectId: "${pullRequestId}"}) {
-                commentEdge { node { id } }
-              }
-            }
-          `)
-    
-          const commentId = addCommentResponse.addComment.commentEdge.node.id
-    
-          // Minimize the comment
-          await github.graphql(`
-            mutation {
-              minimizeComment(input: {subjectId: "${commentId}", classifier: RESOLVED}) { }
-            }
-          `)
-
     - name: Large size increase?
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-artifact-size-increase') }}
       shell: bash
