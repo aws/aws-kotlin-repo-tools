@@ -132,7 +132,7 @@ fun Project.configureKmpTargets() {
                 kmpExt.apply { configureWindows() }
             }
             if ((hasLinux || hasDesktop) && (HostManager.hostIsLinux || NATIVE_ENABLE_ALL_TARGETS)) {
-                if (group == "aws.sdk.kotlin.crt") { // TODO Remove special-casing once K/N is released across the entire project
+                if (group == "aws.sdk.kotlin.crt" || group == "aws.smithy.kotlin") { // TODO Remove special-casing once K/N is released across the entire project
                     kmpExt.apply { configureLinux() }
                 } else {
                     kmpExt.apply { configureDummyLinux() }

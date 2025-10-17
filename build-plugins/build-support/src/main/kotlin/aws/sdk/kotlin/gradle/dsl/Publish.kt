@@ -19,6 +19,8 @@ import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import java.time.Duration
 
+// FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
+
 private object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
@@ -30,6 +32,7 @@ private const val SIGNING_PASSWORD_PROP = "signingPassword"
 private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
 private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 
+// TODO Remove JReleaser environment variables when smithy-kotlin + aws-crt-kotlin are migrated to custom Sonatype integration
 private object EnvironmentVariables {
     const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
     const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
@@ -39,6 +42,9 @@ private object EnvironmentVariables {
     const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
     const val GENERIC_TOKEN = "JRELEASER_GENERIC_TOKEN"
 }
+
+private const val SIGNING_PUBLIC_KEY = "SIGNING_KEY"
+private const val SIGNING_SECRET_KEY = "SIGNING_PASSWORD"
 
 internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
@@ -73,6 +79,7 @@ internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
 private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
     "aws.sdk.kotlin.crt",
     "aws.smithy.kotlin",
+    "com.sonatype.central.testing.amazon",
 )
 
 // Optional override to the above set.
@@ -238,8 +245,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+        val secretKey = System.getenv(SIGNING_PUBLIC_KEY)
+        val passphrase = System.getenv(SIGNING_SECRET_KEY)
 
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
@@ -253,6 +260,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             tasks.withType<AbstractPublishToMaven>().configureEach {
                 mustRunAfter(signingTasks)
             }
+        } else {
+            logger.info("Skipping signing configuration, $SIGNING_PUBLIC_KEY or $SIGNING_SECRET_KEY are not set")
         }
     }
 
@@ -365,10 +374,21 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
-                        active = Active.ALWAYS // the Maven deployer default is ALWAYS, but MavenCentral is NEVER
-                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
+                        active = Active.ALWAYS // the MavenDeployer default is ALWAYS, but MavenCentralDeployer is NEVER
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
+
+                        maxRetries = 100
+                        retryDelay = 60 // seconds
+                        snapshotSupported = false // do not allow publication of snapshot artifacts
+                        applyMavenCentralRules = true
+                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
+                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
+                        checksums = true
+                        sourceJar = true
+                        javadocJar = true
+                        verifyPom = true
+
                         artifacts {
                             artifactOverride {
                                 artifactId = "version-catalog"
@@ -395,16 +415,6 @@ fun Project.configureJReleaser() {
                                 }
                             }
                         }
-                        maxRetries = 100
-                        retryDelay = 60 // seconds
-                        snapshotSupported = false // do not allow publication of snapshot artifacts
-                        applyMavenCentralRules = true
-                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
-                        sign = true
-                        checksums = true
-                        sourceJar = true
-                        javadocJar = true
-                        verifyPom = true
                     }
                 }
             }
@@ -426,7 +436,7 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
         // Standard publication
     } else if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
         // Kotlin/Native publication
-        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES) {
             println("Overriding K/N publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
         } else {
             shouldPublish = shouldPublish && publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES
