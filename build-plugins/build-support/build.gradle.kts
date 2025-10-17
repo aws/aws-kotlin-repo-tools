@@ -31,15 +31,6 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
-gradlePlugin {
-    plugins {
-        create("artifact-size-metrics") {
-            id = "aws.sdk.kotlin.gradle.artifactsizemetrics"
-            implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactsizemetrics.ArtifactSizeMetricsPlugin"
-        }
-    }
-}
-
 val generateKtlintVersion by tasks.registering {
     // generate the version of the runtime to use as a resource.
     // this keeps us from having to manually change version numbers in multiple places

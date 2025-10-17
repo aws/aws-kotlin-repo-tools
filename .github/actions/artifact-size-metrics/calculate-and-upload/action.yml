@@ -1,0 +1,24 @@
+name: Calculate Artifact Size
+description: Calculates size for JVM artifacts
+
+inputs:
+  upload:
+    description: Whether the metrics should be uploaded to S3/Cloudwatch
+    type: boolean
+  release_metrics:
+    description: Whether the metrics are coming from a release build
+    type: boolean
+
+runs:
+  using: composite
+  steps:
+    - name: Calculate and upload artifact sizes
+      shell: bash
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        IDENTIFIER: ${{ github.ref_name }}
+        UPLOAD: ${{ inputs.upload }}
+        RELEASE_METRICS: ${{ inputs.release_metrics }}
+      run: |
+        chmod +x $GITHUB_ACTION_PATH/../utils/calculate-and-upload/main.sh
+        $GITHUB_ACTION_PATH/../utils/calculate-and-upload/main.sh

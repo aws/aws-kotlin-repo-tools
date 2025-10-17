@@ -1,0 +1,31 @@
+name: Process artifact size metrics
+description: Compares artifact size metrics, leaves a comment, and fails if a size increase of ≥5% is detected.
+
+inputs:
+  download:
+    description: Whether the artifact size metrics should be downloaded from S3
+    type: boolean
+
+runs:
+  using: composite
+  steps:
+    # Compares artifact size metrics and sets LARGE_DIFF to true if a size increase of ≥5% is detected.
+    - name: Download and process artifact size metrics
+      shell: bash
+      env:
+        DOWNLOAD: ${{ inputs.download }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        IDENTIFIER: ${{ github.ref_name }}
+      run: |
+        chmod +x $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh        
+        $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh
+
+    - name: Large size increase?
+      if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-artifact-size-increase') }}
+      shell: bash
+      run: |
+        if [ "$LARGE_DIFF" == "true" ]; then
+            echo "An artifact has increased in size by more than 5%.
+            If this is expected, please add the acknowledge-artifact-size-increase label to this pull request."
+            exit 1
+        fi
