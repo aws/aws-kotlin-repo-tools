@@ -19,8 +19,8 @@ runs:
       run: |
         pwd
         ls ../
-        chmod +x ../utils/download-and-process/main.sh        
-        ../utils/download-and-process/main.sh
+        chmod +x $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh        
+        $GITHUB_ACTION_PATH/../utils/download-and-process/main.sh
 
     - name: Large size increase?
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-artifact-size-increase') }}

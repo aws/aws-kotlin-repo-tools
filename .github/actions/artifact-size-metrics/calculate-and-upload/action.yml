@@ -20,5 +20,5 @@ runs:
         UPLOAD: ${{ inputs.upload }}
         RELEASE_METRICS: ${{ inputs.release_metrics }}
       run: |
-        chmod +x ../utils/calculate-and-upload/main.sh
-        ../utils/calculate-and-upload/main.sh
+        chmod +x $GITHUB_ACTION_PATH/../utils/calculate-and-upload/main.sh
+        $GITHUB_ACTION_PATH/../utils/calculate-and-upload/main.sh
