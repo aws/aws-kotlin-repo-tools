@@ -30,7 +30,7 @@ runs:
         ALL_PRS=$(gh pr list \
           --state merged \
           --json number,body,mergedAt \
-          --jq '[.[] | select(.mergedAt > "$TAG_DATE") | .number]' 
+          --jq '[.[] | select(.mergedAt > "'$TAG_DATE'") | .number]' 
         )
         
         # Find all issue number from PRs merged into release branch
