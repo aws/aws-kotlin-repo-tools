@@ -32,9 +32,11 @@ runs:
           --json number,body,mergedAt \
           --jq '[.[] | select(.mergedAt > "'$TAG_DATE'") | .number]' 
         )
-        
+          
         # Find all issue number from PRs merged into release branch
         ISSUE_NUMBERS=""
+        FAILURES=""
+        
         for pr_number in $(echo "$ALL_PRS" | jq -r '.[]'); do
         
           # Get the merge commit SHA for this PR
@@ -44,28 +46,26 @@ runs:
           if git merge-base --is-ancestor "$MERGE_COMMIT" origin/release 2>/dev/null; then
             echo "PR $pr_number is in release branch"
         
-            # Get issue numbers from this PR
-            PR_ISSUES=$(gh pr view "$pr_number" --json body --jq '.body' | \
-              grep -o 'issues/[0-9]+' | \
-              sed 's/issues\///')
+            # Get issue numbers from changelog entries in this PR
+            PR_ISSUES=$(gh pr view "$pr_number" --json files --jq '.files[].path' | \
+              grep '\.changes/.*\.json$' | \
+              xargs -I {} cat {} 2>/dev/null | \
+              jq -r '.issues[]?' 2>/dev/null | \
+              sed 's/.*#//')
             echo "  Found issues: $PR_ISSUES"
         
-            ISSUE_NUMBERS="$ISSUE_NUMBERS $PR_ISSUES"
+            # Comment on each issue
+            for issue in $PR_ISSUES; do
+              if [ -n "$issue" ]; then
+                echo "Commenting on issue #$issue"
+                if ! gh issue comment "$issue" --body "A [change](https://github.com/${{ github.repository }}/pull/$pr_number) related to this issue was included in [**$CURRENT_TAG**](https://github.com/${{ github.repository }}/releases/tag/$CURRENT_TAG)."; then
+                  echo "::error::Failed to comment on issue #$issue"
+                  FAILURES="$FAILURES #$issue"
+                fi
+              fi
+            done   
           fi
         done
-        
-        # Comment on each issue found
-        FAILURES=""
-        
-        while read -r issue_number; do
-          if [ -n "$issue_number" ]; then
-            echo "Commenting on issue #$issue_number"
-            if ! gh issue comment "$issue_number" --body "A change related to this issue was included in [release **$CURRENT_TAG**](https://github.com/${{ github.repository }}/releases/tag/$CURRENT_TAG)."; then
-              echo "::error::Failed to comment on issue #$issue_number"
-              FAILURES="$FAILURES #$issue_number"
-            fi
-          fi
-        done < <(echo "$ISSUE_NUMBERS" | tr ' ' '\n')
         
         if [ -n "$FAILURES" ]; then
           echo "::error::Failed to update the following issue(s):$FAILURES"
