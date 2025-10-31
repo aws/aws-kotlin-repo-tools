@@ -5,8 +5,6 @@
 package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.getOrNull
-import aws.sdk.kotlin.gradle.util.verifyRootProject
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -15,9 +13,6 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
-import org.jreleaser.gradle.plugin.JReleaserExtension
-import org.jreleaser.model.Active
-import java.time.Duration
 
 // FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
 
