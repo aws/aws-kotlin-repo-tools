@@ -45,7 +45,7 @@ class PublishTest {
     }
 
     @Test
-    fun `aws-sdk-kotlin cannot publish Kotlin Native artifacts`() = runTest {
+    fun `aws-sdk-kotlin can publish Kotlin Native artifacts`() = runTest {
         val project = ProjectBuilder.builder().withName("aws-sdk-kotlin").build()
         project.group = "aws.sdk.kotlin"
         project.version = "1.2.3"
@@ -69,7 +69,7 @@ class PublishTest {
                     version = "1.2.3"
                     artifactId = "aws-runtime"
                 }
-                assertFalse(isAvailableForPublication(project, nativeRuntimePublication))
+                assertTrue(isAvailableForPublication(project, nativeRuntimePublication))
             }
         }
     }
@@ -157,7 +157,7 @@ class PublishTest {
 
             ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
                 val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
-                    groupId = "aws.sdk.kotlin"
+                    groupId = "foo.bar.baz"
                     version = "1.2.3"
                     artifactId = "runtime"
                 }
