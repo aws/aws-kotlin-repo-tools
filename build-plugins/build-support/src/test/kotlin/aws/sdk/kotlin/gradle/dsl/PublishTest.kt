@@ -105,7 +105,7 @@ class PublishTest {
     }
 
     @Test
-    fun `users can override smithy-kotlin publication`() = runTest {
+    fun `users can override publication`() = runTest {
         val project = ProjectBuilder.builder().withName("aws-smithy-kotlin").build()
         project.group = "aws.sdk.kotlin"
         project.version = "1.2.3"
@@ -117,7 +117,7 @@ class PublishTest {
         publishing.publications {
             ALLOWED_PUBLICATION_NAMES.forEach {
                 val jvmRuntimePublication = create(it, MavenPublication::class.java).apply {
-                    groupId = "aws.sdk.kotlin"
+                    groupId = "foo.bar.baz"
                     version = "1.2.3"
                     artifactId = "runtime"
                 }
@@ -126,7 +126,7 @@ class PublishTest {
 
             ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
                 val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
-                    groupId = "aws.sdk.kotlin"
+                    groupId = "foo.bar.baz"
                     version = "1.2.3"
                     artifactId = "runtime"
                 }
@@ -148,7 +148,7 @@ class PublishTest {
         publishing.publications {
             ALLOWED_PUBLICATION_NAMES.forEach {
                 val jvmRuntimePublication = create(it, MavenPublication::class.java).apply {
-                    groupId = "aws.sdk.kotlin"
+                    groupId = "foo.bar.baz"
                     version = "1.2.3"
                     artifactId = "runtime"
                 }
