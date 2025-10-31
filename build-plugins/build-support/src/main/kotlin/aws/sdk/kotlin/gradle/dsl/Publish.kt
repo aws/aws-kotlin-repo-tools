@@ -25,24 +25,6 @@ private object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
 
-// TODO Remove once aws-sdk-kotlin migrates to Central Portal
-private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
-private const val SIGNING_KEY_PROP = "signingKey"
-private const val SIGNING_PASSWORD_PROP = "signingPassword"
-private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
-private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
-
-// TODO Remove JReleaser environment variables when smithy-kotlin + aws-crt-kotlin are migrated to custom Sonatype integration
-private object EnvironmentVariables {
-    const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
-    const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
-    const val MAVEN_CENTRAL_TOKEN = "JRELEASER_MAVENCENTRAL_TOKEN"
-    const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
-    const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
-    const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
-    const val GENERIC_TOKEN = "JRELEASER_GENERIC_TOKEN"
-}
-
 private const val SIGNING_PUBLIC_KEY = "SIGNING_KEY"
 private const val SIGNING_SECRET_KEY = "SIGNING_PASSWORD"
 
@@ -80,6 +62,7 @@ private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
     "aws.sdk.kotlin.crt",
     "aws.smithy.kotlin",
     "com.sonatype.central.testing.amazon",
+    "aws.sdk.kotlin",
 )
 
 // Optional override to the above set.
@@ -91,102 +74,6 @@ internal const val OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION = "aws.kotlin.na
  */
 fun Project.skipPublishing() {
     extra.set(Properties.SKIP_PUBLISHING, true)
-}
-
-// TODO Remove this once aws-sdk-kotlin migrates to Central Portal
-fun Project.configureNexusPublishing(repoName: String, githubOrganization: String = "aws") {
-    val project = this
-    apply(plugin = "maven-publish")
-
-    // FIXME: create a real "javadoc" JAR from Dokka output
-    val javadocJar = tasks.register<Jar>("emptyJar") {
-        archiveClassifier.set("javadoc")
-        destinationDirectory.set(layout.buildDirectory.dir("libs"))
-        from()
-    }
-
-    extensions.configure<PublishingExtension> {
-        repositories {
-            maven {
-                name = "testLocal"
-                url = rootProject.layout.buildDirectory.dir("m2").get().asFile.toURI()
-            }
-        }
-
-        publications.all {
-            if (this !is MavenPublication) return@all
-
-            project.afterEvaluate {
-                pom {
-                    name.set(project.name)
-                    description.set(project.description)
-                    url.set("https://github.com/$githubOrganization/$repoName")
-                    licenses {
-                        license {
-                            name.set("Apache-2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set(repoName)
-                            name.set("AWS SDK Kotlin Team")
-                        }
-                    }
-                    scm {
-                        connection.set("scm:git:git://github.com/$githubOrganization/$repoName.git")
-                        developerConnection.set("scm:git:ssh://github.com/$githubOrganization/$repoName.git")
-                        url.set("https://github.com/$githubOrganization/$repoName")
-                    }
-
-                    artifact(javadocJar)
-                }
-            }
-        }
-
-        if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
-            apply(plugin = "signing")
-            extensions.configure<SigningExtension> {
-                useInMemoryPgpKeys(
-                    project.property(SIGNING_KEY_PROP) as String,
-                    project.property(SIGNING_PASSWORD_PROP) as String,
-                )
-                sign(publications)
-            }
-
-            // FIXME - workaround for https://github.com/gradle/gradle/issues/26091
-            val signingTasks = tasks.withType<Sign>()
-            tasks.withType<AbstractPublishToMaven>().configureEach {
-                mustRunAfter(signingTasks)
-            }
-        }
-    }
-
-    fun isAvailableForNexusPublication(project: Project, publication: MavenPublication): Boolean {
-        var shouldPublish = true
-
-        // Check SKIP_PUBLISH_PROP
-        if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
-
-        // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
-        val publishGroupName = project.findProperty(PUBLISH_GROUP_NAME_PROP) as? String
-        shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
-
-        // Validate publication name is allowed to be published
-        shouldPublish = shouldPublish && ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) }
-
-        return shouldPublish
-    }
-
-    tasks.withType<AbstractPublishToMaven>().configureEach {
-        onlyIf {
-            isAvailableForNexusPublication(project, publication).also {
-                if (!it) {
-                    logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -270,152 +157,6 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             isAvailableForPublication(project, publication).also {
                 if (!it) {
                     logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
-                }
-            }
-        }
-    }
-}
-
-/**
- * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
- */
-fun Project.configureNexus(
-    nexusUrl: String = "https://ossrh-staging-api.central.sonatype.com/service/local/",
-    snapshotRepositoryUrl: String = "https://central.sonatype.com/repository/maven-snapshots/",
-) {
-    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
-
-    val requiredProps = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
-    val doConfigure = requiredProps.all { project.hasProperty(it) }
-    if (!doConfigure) {
-        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
-        return
-    }
-
-    apply(plugin = "io.github.gradle-nexus.publish-plugin")
-    extensions.configure<NexusPublishExtension> {
-        val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
-        group = publishGroupName
-        packageGroup.set(publishGroupName)
-        repositories {
-            create("awsNexus") {
-                this.nexusUrl.set(uri(nexusUrl))
-                this.snapshotRepositoryUrl.set(uri(snapshotRepositoryUrl))
-                username.set(project.property(SONATYPE_USERNAME_PROP) as String)
-                password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
-            }
-        }
-
-        transitionCheckOptions {
-            maxRetries.set(180)
-            delayBetween.set(Duration.ofSeconds(10))
-        }
-    }
-}
-
-/**
- * Configure JReleaser publishing plugin. This (conditionally) enables the `org.jreleaser` plugin and configures it.
- */
-fun Project.configureJReleaser() {
-    verifyRootProject { "JReleaser configuration must be applied to the root project only" }
-
-    val requiredVariables = listOf(
-        EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
-        EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
-        EnvironmentVariables.GENERIC_TOKEN,
-    )
-
-    if (!requiredVariables.all { !System.getenv(it).isNullOrBlank() }) {
-        logger.warn("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
-        return
-    }
-
-    // Collect a set of native artifact IDs (with platform suffix removed) from every project
-    val nativeArtifactIds = providers.provider {
-        allprojects.flatMap {
-            it.extensions.findByType(PublishingExtension::class.java)
-                ?.publications
-                ?.withType(MavenPublication::class.java)
-                ?.filter { it.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES }
-                ?.map {
-                    // Remove platform from artifact ID. This allows us to register artifact overrides for _all_ platforms,
-                    // not just for the targets enabled on the current host.
-                    var artifactIdWithoutPlatform = it.artifactId
-                    ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach { platform ->
-                        artifactIdWithoutPlatform = artifactIdWithoutPlatform.removeSuffix("-${platform.lowercase()}")
-                    }
-                    artifactIdWithoutPlatform
-                }
-                ?: emptySet()
-        }.toSet()
-    }
-
-    apply(plugin = "org.jreleaser")
-    extensions.configure<JReleaserExtension> {
-        project {
-            version = providers.gradleProperty("sdkVersion").get()
-        }
-
-        // JReleaser requires a releaser to be configured even though we don't use it.
-        // https://github.com/jreleaser/jreleaser/discussions/1725#discussioncomment-10674529
-        release {
-            generic {
-                skipRelease = true
-            }
-        }
-
-        // We don't announce our releases anywhere
-        // https://jreleaser.org/guide/latest/reference/announce/index.html
-        announce {
-            active = Active.NEVER
-        }
-
-        deploy {
-            maven {
-                mavenCentral {
-                    create("maven-central") {
-                        active = Active.ALWAYS // the MavenDeployer default is ALWAYS, but MavenCentralDeployer is NEVER
-                        url = "https://central.sonatype.com/api/v1/publisher"
-                        stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
-
-                        maxRetries = 100
-                        retryDelay = 60 // seconds
-                        snapshotSupported = false // do not allow publication of snapshot artifacts
-                        applyMavenCentralRules = true
-                        sign = false // Signing is done when publishing, see the 'configurePublishing' function
-                        // all of the following should be enabled by applyMavenCentralRules but set them explicitly to be sure
-                        checksums = true
-                        sourceJar = true
-                        javadocJar = true
-                        verifyPom = true
-
-                        artifacts {
-                            artifactOverride {
-                                artifactId = "version-catalog"
-
-                                // Version catalogs don't produce JARs
-                                jar = false
-                                sourceJar = false
-                                javadocJar = false
-
-                                // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
-                                verifyPom = false
-                            }
-                            gradle.projectsEvaluated {
-                                nativeArtifactIds.get().forEach { artifactIdWithoutPlatform ->
-                                    // Add an artifact override rule for each platform
-                                    ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach { platform ->
-                                        logger.info("Configuring JReleaser artifact override for $artifactIdWithoutPlatform-${platform.lowercase()}")
-                                        artifactOverride {
-                                            artifactId = "$artifactIdWithoutPlatform-${platform.lowercase()}"
-                                            jar = false // Native artifacts produce klibs, not JARs
-                                            verifyPom = false // JReleaser fails when processing <packaging>klib</packaging> tag: `Unknown packaging: klib`
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
