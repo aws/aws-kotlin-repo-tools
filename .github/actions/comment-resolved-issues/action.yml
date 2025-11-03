@@ -1,0 +1,73 @@
+name: 'Comment on Resolved Issues'
+description: 'Comments on issues referenced in PRs merged since last release'
+
+inputs:
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+    default: ${{ github.token }}
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Comment on issues
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
+        CURRENT_TAG=$(git tag --sort=-version:refname | sed -n '1p')
+
+        # Convert tag date to GitHub search format
+        TAG_DATE=$(git log -1 --format="%ci" "$PREVIOUS_TAG" | sed 's/ /T/' | sed 's/ +0000/Z/')
+        echo "Using tag date: $TAG_DATE"
+        
+        # Find all PRs merged from the last release tag date
+        ALL_PRS=$(gh pr list \
+          --state merged \
+          --json number,body,mergedAt \
+          --jq '[.[] | select(.mergedAt > "'$TAG_DATE'") | .number]' 
+        )
+          
+        # Find all issue number from PRs merged into release branch
+        ISSUE_NUMBERS=""
+        FAILURES=""
+        
+        for pr_number in $(echo "$ALL_PRS" | jq -r '.[]'); do
+        
+          # Get the merge commit SHA for this PR
+          MERGE_COMMIT=$(gh pr view "$pr_number" --json mergeCommit --jq '.mergeCommit.oid')
+        
+          # Check if this commit exists in the release branch
+          if git merge-base --is-ancestor "$MERGE_COMMIT" origin/release 2>/dev/null; then
+            echo "PR $pr_number is in release branch"
+        
+            # Get issue numbers from changelog entries in this PR
+            PR_ISSUES=$(gh pr view "$pr_number" --json files --jq '.files[].path' | \
+              grep '\.changes/.*\.json$' | \
+              xargs -I {} cat {} 2>/dev/null | \
+              jq -r '.issues[]?' 2>/dev/null | \
+              sed 's/.*#//')
+            echo "  Found issues: $PR_ISSUES"
+        
+            # Comment on each issue
+            for issue in $PR_ISSUES; do
+              if [ -n "$issue" ]; then
+                echo "Commenting on issue #$issue"
+                if ! gh issue comment "$issue" --body "A [change](https://github.com/${{ github.repository }}/pull/$pr_number) related to this issue was included in [**$CURRENT_TAG**](https://github.com/${{ github.repository }}/releases/tag/$CURRENT_TAG)."; then
+                  echo "::error::Failed to comment on issue #$issue"
+                  FAILURES="$FAILURES #$issue"
+                fi
+              fi
+            done   
+          fi
+        done
+        
+        if [ -n "$FAILURES" ]; then
+          echo "::error::Failed to update the following issue(s):$FAILURES"
+          exit 1
+        fi
