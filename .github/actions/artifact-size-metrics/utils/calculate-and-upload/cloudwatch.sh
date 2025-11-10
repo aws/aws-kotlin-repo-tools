@@ -30,7 +30,7 @@ uploadToCloudwatch() {
   done < "$metrics_file"
 
   namespace="Artifact Size Metrics"
-  chunk_size=1000
+  chunk_size=100
 
   # Send metrics in chunks
   for ((i=0; i<${#metrics[@]}; i+=chunk_size)); do

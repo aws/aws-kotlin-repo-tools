@@ -17,7 +17,7 @@ calculateArtifactSizes "$metrics_file" # see: constants.sh
 if [ "$UPLOAD" == "true" ]; then
   if [ "$RELEASE_METRICS" == "true" ]; then
     # For record-keeping
-    uploadToMetricsBucket "$metrics_file" "$GITHUB_REPOSITORY"-v"$IDENTIFIER".csv
+    uploadToMetricsBucket "$metrics_file" "$GITHUB_REPOSITORY"-"$IDENTIFIER".csv
     uploadToMetricsBucket "$metrics_file" "$GITHUB_REPOSITORY"-latest.csv
 
     # For display in our OPS dashboard
