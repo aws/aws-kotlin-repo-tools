@@ -6,7 +6,9 @@ runs:
   steps:
     - name: Checkout sources
       uses: actions/checkout@v4
-
+      with:
+        token: ${{ secrets.CI_USER_PAT }}
+        fetch-depth: 0
     - name: Setup kat
       uses: aws/aws-kotlin-repo-tools/.github/actions/setup-kat@main
 
