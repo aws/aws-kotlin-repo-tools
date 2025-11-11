@@ -5,9 +5,7 @@ runs:
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.CI_USER_PAT }}
-        fetch-depth: 0
+
     - name: Configure Gradle
       uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
 
