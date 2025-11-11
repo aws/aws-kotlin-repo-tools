@@ -13,7 +13,7 @@ uploadToCloudwatch() {
       artifactSize=$(echo "$artifactSize" | xargs)
 
       # Build metric JSON
-      metrics+=("jq -n \
+      metric_json=$(jq -n \
           --arg name "$GITHUB_REPOSITORY-$artifactName" \
           --arg value "$artifactSize" \
           --arg project "$GITHUB_REPOSITORY" \
@@ -25,8 +25,9 @@ uploadToCloudwatch() {
               Dimensions: [
                   { Name: "Project", Value: $project }
               ]
-          }'
-      )")
+          }')
+
+    metrics+=("$metric_json")
   done < "$metrics_file"
 
   namespace="Artifact Size Metrics"
