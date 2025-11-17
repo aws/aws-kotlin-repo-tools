@@ -1,17 +1,33 @@
 name: Release
 
 on:
+  pull_request: # TODO: REMOVE WHEN DONE TESTING
   workflow_dispatch:
     inputs:
       version-override:
         type: string
         required: false
         description: 'Optionally specify a custom release version (minor version bump e.g.)'
-      kn-release:
+      kn-release: # TODO: REMOVE KN LOGIC AT THE END AS A SEPARATE COMMIT
         type: boolean
         required: false
         default: false
         description: 'Whether the release is a KN variant of repo tools or not'
+      sdk-version-bump:
+        type: boolean
+        required: false
+        default: false
+        description: 'Whether to create an SDK version bump pull request for this release'
+      smithy-kotlin-version-bump:
+        type: boolean
+        required: false
+        default: false
+        description: 'Whether to create a Smithy Kotlin version bump pull request for this release'
+      crt-kotlin-version-bump:
+        type: boolean
+        required: false
+        default: false
+        description: 'Whether to create an CRT Kotlin version bump pull request for this release'
 
 permissions:
   id-token: write
@@ -63,12 +79,44 @@ jobs:
           aws-region: us-west-2
 
       - name: Run codebuild release job
+        id: release-job
         uses: aws-actions/aws-codebuild-run-build@v1
         with:
           project-name: publish-aws-kotlin-repo-tools
           source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
+      - name: Checkout SDK # TODO: ADD BACK IF
+        uses: actions/checkout@v4
+        with:
+          repository: 'aws/aws-sdk-kotlin'
+          path: 'aws-sdk-kotlin'
+          token: ${{ secrets.CI_USER_PAT }}
+
+      - name: SDK pull request # TODO: ADD BACK IF
+        env:
+          NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+        run: |
+          BRANCH=version-bump-$NEW_VERSION
+          
+          cd aws-sdk-kotlin
+          git branch $BRANCH
+          git checkout $BRANCH
+          
+          git config user.name aws-sdk-kotlin-ci
+          git config user.email "aws-kotlin-sdk-automation@amazon.com"
+          
+          sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
+          
+          git add gradle/libs.versions.toml
+          git commit -m "misc: repo tools version bump"
+          
+          git push --set-upstream origin $BRANCH
+          
+          gh pr create --title "misc: repo tools v$NEW_VERSION"
+
       - name: Delete failed release tag
         if: ${{ failure() }}
         run: |
-          git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          if [ "${{ steps.release-job.outcome }}" != "success" ]; then
+            git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          fi
