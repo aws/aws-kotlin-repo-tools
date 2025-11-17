@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  pull_request:
+  pull_request: # TODO: REMOVE WHEN DONE TESTING
   workflow_dispatch:
     inputs:
       version-override:
@@ -85,15 +85,13 @@ jobs:
           project-name: publish-aws-kotlin-repo-tools
           source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
-      - name: Checkout SDK
-        if: ${{ inputs.sdk-version-bump == 'true' }}
+      - name: Checkout SDK # TODO: ADD BACK IF
         uses: actions/checkout@v4
         with:
           repository: 'aws/aws-sdk-kotlin'
           path: 'aws-sdk-kotlin'
 
-      - name: SDK pull request
-        if: ${{ inputs.sdk-version-bump == 'true' }}
+      - name: SDK pull request # TODO: ADD BACK IF
         env:
           NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
         run: |
