@@ -101,6 +101,9 @@ jobs:
           git branch $BRANCH
           git checkout $BRANCH
           
+          git config user.name aws-sdk-kotlin-ci
+          git config user.email "aws-kotlin-sdk-automation@amazon.com"
+          
           sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
           
           git add gradle/libs.versions.toml
