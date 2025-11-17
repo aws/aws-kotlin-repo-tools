@@ -84,21 +84,21 @@ jobs:
           echo "Mocking release"
 
       - name: AWS SDK Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/@automate-repo-tools-version-bump
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
           org: 'aws'
           repo: 'aws-sdk-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: Smithy Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/@automate-repo-tools-version-bump
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
           org: 'smithy-lang'
           repo: 'smithy-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: CRT Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/@automate-repo-tools-version-bump
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
           ogr: 'aws'
           repo: 'aws-crt-kotlin'
