@@ -90,6 +90,7 @@ jobs:
         with:
           repository: 'aws/aws-sdk-kotlin'
           path: 'aws-sdk-kotlin'
+          token: ${{ secrets.CI_USER_PAT }}
 
       - name: SDK pull request # TODO: ADD BACK IF
         env:
