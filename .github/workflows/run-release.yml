@@ -95,7 +95,7 @@ jobs:
           NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           GH_TOKEN: ${{ secrets.CI_USER_PAT }}
         run: |
-          BRANCH=version-bump-$NEW_VERSION
+          BRANCH=repo-tools-$NEW_VERSION
           
           cd aws-sdk-kotlin
           git branch $BRANCH
@@ -107,11 +107,11 @@ jobs:
           sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
           
           git add gradle/libs.versions.toml
-          git commit -m "misc: repo tools version bump"
+          git commit -m "misc: repo tools v$NEW_VERSION"
           
           git push --force --set-upstream origin $BRANCH
           
-          gh pr create --title "misc: repo tools v$NEW_VERSION"
+          gh pr create --title "misc: repo tools v$NEW_VERSION" --body "Bumps repo tools to v$NEW_VERSION"
 
       - name: Delete failed release tag # TODO: UN-ECHO THE COMMAND
         if: ${{ failure() }}
