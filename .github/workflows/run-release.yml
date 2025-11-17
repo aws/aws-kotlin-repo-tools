@@ -96,9 +96,15 @@ jobs:
           NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
         run: |
           cd aws-sdk-kotlin
+          
+          git config user.name aws-sdk-kotlin-ci
+          git config user.email "aws-kotlin-sdk-automation@amazon.com"
+          
           sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
+          
           git add gradle/libs.versions.toml
           git commit -S -m "misc: repo tools version bump"
+          
           gh pr create --title "misc: repo tools version bump" --body "Bumps repo tools version"
 
       - name: Delete failed release tag
