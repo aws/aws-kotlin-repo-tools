@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request: # TODO: REMOVE WHEN DONE TESTING
   workflow_dispatch:
     inputs:
       version-override:
@@ -63,14 +62,14 @@ jobs:
           ((PATCH_NUMBER++))
           echo "NEW_VERSION=$MAJOR.$MINOR.$PATCH_NUMBER$PATCH_SUFFIX" >> "$GITHUB_OUTPUT"
 
-      - name: Create new version tag # TODO: UN-ECHO COMMAND
+      - name: Create new version tag
         env:
           NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
         run: |
           git config user.name aws-sdk-kotlin-ci
           git config user.email "aws-kotlin-sdk-automation@amazon.com" 
           git tag "$NEW_VERSION"
-          echo git push origin "$NEW_VERSION"
+          git push origin "$NEW_VERSION"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -79,34 +78,39 @@ jobs:
           aws-region: us-west-2
 
       - name: Run codebuild release job
-        id: release-job # TODO: ADD BACK ACTUAL RELEASE
-        run: |
-          echo "Mocking release"
+        id: release-job
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: publish-aws-kotlin-repo-tools
+          source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
-      - name: AWS SDK Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
+      - name: AWS SDK Kotlin pull request
+        if: ${{ inputs.sdk-version-bump == 'true' }}
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
         with:
           repo: 'aws/aws-sdk-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           pat: ${{ secrets.CI_USER_PAT }}
 
-      - name: Smithy Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
+      - name: Smithy Kotlin pull request
+        if: ${{ inputs.smithy-kotlin-version-bump == 'true' }}
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
         with:
           repo: 'smithy-lang/smithy-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           pat: ${{ secrets.CI_USER_PAT }}
 
-      - name: CRT Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
+      - name: CRT Kotlin pull request
+        if: ${{ inputs.crt-kotlin-version-bump == 'true' }}
+        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
         with:
           repo: 'aws/aws-crt-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           pat: ${{ secrets.CI_USER_PAT }}
 
-      - name: Delete failed release tag # TODO: UN-ECHO THE COMMAND
+      - name: Delete failed release tag
         if: ${{ failure() }}
         run: |
           if [ "${{ steps.release-job.outcome }}" != "success" ]; then
-            echo git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+            git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           fi
