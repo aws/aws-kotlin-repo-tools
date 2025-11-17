@@ -112,7 +112,7 @@ jobs:
           
           EXISTING_PR=$(gh pr view $BRANCH --json number -q ".number" 2>/dev/null)
           
-          if [ -z "$PR_NUMBER" ]; then
+          if [ -z "$EXISTING_PR" ]; then
             PR_URL=$(gh pr create --title "misc: repo tools v$NEW_VERSION" --body "Bumps repo tools to v$NEW_VERSION")
             PR_NUMBER=$(basename $PR_URL)
             gh pr edit $PR_NUMBER --add-label "no-changelog"
