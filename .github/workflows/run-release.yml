@@ -7,11 +7,6 @@ on:
         type: string
         required: false
         description: 'Optionally specify a custom release version (minor version bump e.g.)'
-      kn-release: # TODO: REMOVE KN LOGIC AT THE END AS A SEPARATE COMMIT
-        type: boolean
-        required: false
-        default: false
-        description: 'Whether the release is a KN variant of repo tools or not'
       sdk-version-bump:
         type: boolean
         required: false
@@ -50,11 +45,7 @@ jobs:
             exit 0
           fi
           
-          if [ "${{ inputs.kn-release }}" == "true" ]; then
-            CURRENT_VERSION=$(git tag --sort=-creatordate | grep -- '-kn$' | head -n 1)
-          else
-            CURRENT_VERSION=$(git tag --sort=-creatordate | grep -v -- '-kn$' | head -n 1)
-          fi
+          CURRENT_VERSION=$(git tag --sort=-creatordate | grep -- '-kn$' | head -n 1)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
