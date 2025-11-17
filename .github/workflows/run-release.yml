@@ -86,22 +86,19 @@ jobs:
       - name: AWS SDK Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
         uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
-          org: 'aws'
-          repo: 'aws-sdk-kotlin'
+          repo: 'aws/aws-sdk-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: Smithy Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
         uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
-          org: 'smithy-lang'
-          repo: 'smithy-kotlin'
+          repo: 'smithy-lang/smithy-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: CRT Kotlin pull request # TODO: ADD BACK IF && SET BRANCH TO MAIN
         uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@automate-repo-tools-version-bump
         with:
-          ogr: 'aws'
-          repo: 'aws-crt-kotlin'
+          repo: 'aws/aws-crt-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: Delete failed release tag # TODO: UN-ECHO THE COMMAND

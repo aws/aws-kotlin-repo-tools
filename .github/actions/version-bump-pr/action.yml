@@ -2,9 +2,6 @@ name: Post release downstream version bump
 description: Creates a version bump PR of repo tools in the specified downstream repo
 
 inputs:
-  org:
-    description: Downstream repo org
-    required: true
   repo:
     description: Downstream repo name
     required: true
@@ -18,7 +15,7 @@ runs:
     - name: Checkout SDK
       uses: actions/checkout@v4
       with:
-        repository: '${{ inputs.org }}/'${{ inputs.repo }}
+        repository: ${{ inputs.repo }}
         path: ${{ inputs.repo }}
         token: ${{ secrets.CI_USER_PAT }}
 
