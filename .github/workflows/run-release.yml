@@ -109,8 +109,8 @@ jobs:
           git add gradle/libs.versions.toml
           git commit -m "misc: repo tools version bump"
           
-          git pull
           git push --set-upstream origin $BRANCH
+          git pull origin $BRANCH
           
           gh pr create --title "misc: repo tools v$NEW_VERSION"
 
