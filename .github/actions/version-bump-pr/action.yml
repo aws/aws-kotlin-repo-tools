@@ -8,6 +8,9 @@ inputs:
   version:
     description: Repo tools version for pull request
     required: true
+  pat:
+    description: A GitHub personal access token used to authenticate the requests in this action
+    required: true
 
 runs:
   using: composite
@@ -17,14 +20,14 @@ runs:
       with:
         repository: ${{ inputs.repo }}
         path: ${{ inputs.repo }}
-        token: ${{ secrets.CI_USER_PAT }}
+        token: ${{ inputs.pat }}
 
     - name: Create pull request
       shell: bash
       env:
         REPO: ${{ inputs.repo }}
         NEW_VERSION: ${{ inputs.version }}
-        GH_TOKEN: ${{ secrets.CI_USER_PAT }}
+        GH_TOKEN: ${{ inputs.pat }}
       run: |
         BRANCH=repo-tools-$NEW_VERSION
         
