@@ -63,14 +63,14 @@ jobs:
           ((PATCH_NUMBER++))
           echo "NEW_VERSION=$MAJOR.$MINOR.$PATCH_NUMBER$PATCH_SUFFIX" >> "$GITHUB_OUTPUT"
 
-      - name: Create new version tag
+      - name: Create new version tag # TODO: UN-ECHO COMMAND
         env:
           NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
         run: |
           git config user.name aws-sdk-kotlin-ci
           git config user.email "aws-kotlin-sdk-automation@amazon.com" 
           git tag "$NEW_VERSION"
-          git push origin "$NEW_VERSION"
+          echo git push origin "$NEW_VERSION"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -79,11 +79,9 @@ jobs:
           aws-region: us-west-2
 
       - name: Run codebuild release job
-        id: release-job
-        uses: aws-actions/aws-codebuild-run-build@v1
-        with:
-          project-name: publish-aws-kotlin-repo-tools
-          source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+        id: release-job # TODO: ADD BACK ACTUAL RELEASE
+        run: |
+          echo "Mocking release"
 
       - name: Checkout SDK # TODO: ADD BACK IF
         uses: actions/checkout@v4
@@ -114,9 +112,9 @@ jobs:
           
           gh pr create --title "misc: repo tools v$NEW_VERSION"
 
-      - name: Delete failed release tag
+      - name: Delete failed release tag # TODO: UN-ECHO THE COMMAND
         if: ${{ failure() }}
         run: |
           if [ "${{ steps.release-job.outcome }}" != "success" ]; then
-            git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+            echo git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           fi
