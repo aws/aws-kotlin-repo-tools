@@ -1,0 +1,70 @@
+name: Post release downstream version bump
+description: Creates a version bump PR of repo tools in the specified downstream repo
+
+inputs:
+  repo:
+    description: Downstream repo name
+    required: true
+  version:
+    description: Repo tools version for pull request
+    required: true
+  pat:
+    description: A GitHub personal access token used to authenticate the requests in this action
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout SDK
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repo }}
+        path: ${{ inputs.repo }}
+        token: ${{ inputs.pat }}
+
+    - name: Create pull request
+      shell: bash
+      env:
+        REPO: ${{ inputs.repo }}
+        NEW_VERSION: ${{ inputs.version }}
+        GH_TOKEN: ${{ inputs.pat }}
+      run: |
+        BRANCH=repo-tools-$NEW_VERSION
+        
+        cd $REPO
+        echo "Creating branch: $BRANCH"
+        git checkout -b $BRANCH
+        
+        echo "Configuring git"
+        git config user.name aws-sdk-kotlin-ci
+        git config user.email "aws-kotlin-sdk-automation@amazon.com"
+        
+        echo "Modifying version catalog to use repo tools $NEW_VERSION"
+        sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
+        
+        echo "Modified version catalog:"
+        cat gradle/libs.versions.toml
+        
+        echo "Commiting modifications"
+        git add gradle/libs.versions.toml
+        git commit -m "misc: repo tools v$NEW_VERSION"
+        
+        echo "Pushing changes upstream"
+        git push --force --set-upstream origin $BRANCH
+        
+        EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
+        
+        if [ -z "$EXISTING_PR" ]; then
+          echo "Creating pull request" 
+          PR_URL=$(gh pr create --title "misc: repo tools v$NEW_VERSION" --body "Bumps repo tools to v$NEW_VERSION")
+          echo "Pull request created: $PR_URL"
+          
+          echo "Adding no-changelog label"
+          PR_NUMBER=$(basename $PR_URL)
+          gh pr edit $PR_NUMBER --add-label "no-changelog"
+        else 
+          echo "::warning::Existing pull request found: $EXISTING_PR"
+        fi
+        
+        echo "Resetting current dir:"
+        cd $$GITHUB_ACTION_PATH
