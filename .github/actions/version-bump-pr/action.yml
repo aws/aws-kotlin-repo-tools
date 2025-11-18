@@ -31,7 +31,7 @@ runs:
       run: |
         BRANCH=repo-tools-$NEW_VERSION
         
-        pushd $REPO
+        cd $REPO
         echo "Creating branch: $BRANCH"
         git checkout -b $BRANCH
         
@@ -65,6 +65,3 @@ runs:
         else 
           echo "::warning::Existing pull request found: $EXISTING_PR"
         fi
-        
-        echo "Resetting working dir:"
-        popd
