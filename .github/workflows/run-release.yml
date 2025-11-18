@@ -98,6 +98,6 @@ jobs:
           pat: ${{ secrets.CI_USER_PAT }}
 
       - name: Delete failed release tag
-        iif: ${{ failure() && steps.release-job.outcome != 'success' }}
+        if: ${{ failure() && steps.release-job.outcome != 'success' }}
         run: |
           git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
