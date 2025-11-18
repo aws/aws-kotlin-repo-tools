@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       version-override:
@@ -77,6 +76,7 @@ jobs:
           source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
       - name: AWS SDK Kotlin pull request
+        if: ${{ inputs.sdk-version-bump == 'true' }}
         uses: ./.github/actions/version-bump-pr
         with:
           repo: 'aws/aws-sdk-kotlin'
@@ -84,6 +84,7 @@ jobs:
           pat: ${{ secrets.CI_USER_PAT }}
 
       - name: Smithy Kotlin pull request
+        if: ${{ inputs.smithy-kotlin-version-bump == 'true' }}
         uses: ./.github/actions/version-bump-pr
         with:
           repo: 'smithy-lang/smithy-kotlin'
@@ -91,6 +92,7 @@ jobs:
           pat: ${{ secrets.CI_USER_PAT }}
 
       - name: CRT Kotlin pull request
+        if: ${{ inputs.crt-kotlin-version-bump == 'true' }}
         uses: ./.github/actions/version-bump-pr
         with:
           repo: 'aws/aws-crt-kotlin'
