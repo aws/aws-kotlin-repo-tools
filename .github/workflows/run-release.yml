@@ -21,7 +21,7 @@ on:
         type: boolean
         required: false
         default: false
-        description: 'Whether to create an CRT Kotlin version bump pull request for this release'
+        description: 'Whether to create a CRT Kotlin version bump pull request for this release'
 
 permissions:
   id-token: write
@@ -45,7 +45,7 @@ jobs:
             exit 0
           fi
           
-          CURRENT_VERSION=$(git tag --sort=-creatordate | grep -- '-kn$' | head -n 1)
+          CURRENT_VERSION=$(git tag --sort=-creatordate | head -n 1)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
@@ -77,7 +77,7 @@ jobs:
 
       - name: AWS SDK Kotlin pull request
         if: ${{ inputs.sdk-version-bump == 'true' }}
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
+        uses: ./.github/actions/version-bump-pr
         with:
           repo: 'aws/aws-sdk-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: Smithy Kotlin pull request
         if: ${{ inputs.smithy-kotlin-version-bump == 'true' }}
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
+        uses: ./.github/actions/version-bump-pr@main
         with:
           repo: 'smithy-lang/smithy-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
@@ -93,15 +93,13 @@ jobs:
 
       - name: CRT Kotlin pull request
         if: ${{ inputs.crt-kotlin-version-bump == 'true' }}
-        uses: aws/aws-kotlin-repo-tools/.github/actions/version-bump-pr@main
+        uses: ./.github/actions/version-bump-pr@main
         with:
           repo: 'aws/aws-crt-kotlin'
           version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
           pat: ${{ secrets.CI_USER_PAT }}
 
       - name: Delete failed release tag
-        if: ${{ failure() }}
+        iif: ${{ failure() && steps.release-job.outcome != 'success' }}
         run: |
-          if [ "${{ steps.release-job.outcome }}" != "success" ]; then
-            git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
-          fi
+          git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}

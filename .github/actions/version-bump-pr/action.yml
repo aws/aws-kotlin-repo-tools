@@ -32,22 +32,36 @@ runs:
         BRANCH=repo-tools-$NEW_VERSION
         
         cd $REPO
-        git branch $BRANCH
-        git checkout $BRANCH
+        echo "Creating branch: $BRANCH"
+        git checkout -b $BRANCH
         
+        echo "Configuring git"
         git config user.name aws-sdk-kotlin-ci
         git config user.email "aws-kotlin-sdk-automation@amazon.com"
         
+        echo "Modifying version catalog to use repo tools $NEW_VERSION"
         sed -i "s/aws-kotlin-repo-tools-version = .*/aws-kotlin-repo-tools-version = \"$NEW_VERSION\"/" gradle/libs.versions.toml
         
+        echo "Modified version catalog:"
+        cat gradle/libs.versions.toml
+        
+        echo "Commiting modifications"
         git add gradle/libs.versions.toml
         git commit -m "misc: repo tools v$NEW_VERSION"
+        
+        echo "Pushing changes upstream"
         git push --force --set-upstream origin $BRANCH
         
         EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
         
         if [ -z "$EXISTING_PR" ]; then
+          echo "Creating pull request" 
           PR_URL=$(gh pr create --title "misc: repo tools v$NEW_VERSION" --body "Bumps repo tools to v$NEW_VERSION")
+          echo "Pull request created: $PR_URL"
+          
+          echo "Adding no-changelog label"
           PR_NUMBER=$(basename $PR_URL)
           gh pr edit $PR_NUMBER --add-label "no-changelog"
+        else 
+          echo "::warning::Existing pull request found: $EXISTING_PR"
         fi
