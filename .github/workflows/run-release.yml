@@ -7,11 +7,21 @@ on:
         type: string
         required: false
         description: 'Optionally specify a custom release version (minor version bump e.g.)'
-      kn-release:
+      sdk-version-bump:
         type: boolean
         required: false
         default: false
-        description: 'Whether the release is a KN variant of repo tools or not'
+        description: 'Whether to create an SDK version bump pull request for this release'
+      smithy-kotlin-version-bump:
+        type: boolean
+        required: false
+        default: false
+        description: 'Whether to create a Smithy Kotlin version bump pull request for this release'
+      crt-kotlin-version-bump:
+        type: boolean
+        required: false
+        default: false
+        description: 'Whether to create a CRT Kotlin version bump pull request for this release'
 
 permissions:
   id-token: write
@@ -35,11 +45,7 @@ jobs:
             exit 0
           fi
           
-          if [ "${{ inputs.kn-release }}" == "true" ]; then
-            CURRENT_VERSION=$(git tag --sort=-creatordate | grep -- '-kn$' | head -n 1)
-          else
-            CURRENT_VERSION=$(git tag --sort=-creatordate | grep -v -- '-kn$' | head -n 1)
-          fi
+          CURRENT_VERSION=$(git tag --sort=-creatordate | head -n 1)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
@@ -63,12 +69,37 @@ jobs:
           aws-region: us-west-2
 
       - name: Run codebuild release job
+        id: release-job
         uses: aws-actions/aws-codebuild-run-build@v1
         with:
           project-name: publish-aws-kotlin-repo-tools
           source-version-override: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
 
+      - name: AWS SDK Kotlin pull request
+        if: ${{ inputs.sdk-version-bump == 'true' }}
+        uses: ./.github/actions/version-bump-pr
+        with:
+          repo: 'aws/aws-sdk-kotlin'
+          version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          pat: ${{ secrets.CI_USER_PAT }}
+
+      - name: Smithy Kotlin pull request
+        if: ${{ inputs.smithy-kotlin-version-bump == 'true' }}
+        uses: ./.github/actions/version-bump-pr
+        with:
+          repo: 'smithy-lang/smithy-kotlin'
+          version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          pat: ${{ secrets.CI_USER_PAT }}
+
+      - name: CRT Kotlin pull request
+        if: ${{ inputs.crt-kotlin-version-bump == 'true' }}
+        uses: ./.github/actions/version-bump-pr
+        with:
+          repo: 'aws/aws-crt-kotlin'
+          version: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          pat: ${{ secrets.CI_USER_PAT }}
+
       - name: Delete failed release tag
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.release-job.outcome != 'success' }}
         run: |
           git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
