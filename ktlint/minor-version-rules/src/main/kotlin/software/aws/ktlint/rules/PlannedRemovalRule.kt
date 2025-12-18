@@ -15,10 +15,9 @@ import java.util.Properties
 /**
  * Matches @PlannedRemoval with either named args (major=x, minor=y) or positional args (x, y)
  */
-internal fun plannedRemovalRegex(major: Int, minor: Int): Regex =
-    Regex(
-        """@PlannedRemoval\s*\(\s*(?:major\s*=\s*$major\s*,\s*minor\s*=\s*$minor\s*|\s*$major\s*,\s*$minor\s*)\s*\)""",
-    )
+internal fun plannedRemovalRegex(major: Int, minor: Int): Regex = Regex(
+    """@PlannedRemoval\s*\(\s*(?:major\s*=\s*$major\s*,\s*minor\s*=\s*$minor\s*|\s*$major\s*,\s*$minor\s*)\s*\)""",
+)
 
 /**
  * Creates a ktlint rule that detects APIs annotated with @PlannedRemoval for the upcoming minor version.
