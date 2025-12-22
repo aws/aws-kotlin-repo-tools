@@ -1,5 +1,4 @@
 [versions]
-aws-sdk-version = "1.5.105"  #TODO Bump to 1.6.0 once released
 kotlin-version = "2.3.0"
 ktlint-version = "1.8.0"
 publish-plugin-version = "2.0.0"
@@ -12,8 +11,6 @@ okhttp-version = "5.3.2"
 kotlinx-serialization-version = "1.9.0"
 
 [libraries]
-aws-sdk-cloudwatch = { module = "aws.sdk.kotlin:cloudwatch", version.ref = "aws-sdk-version" }
-aws-sdk-s3 = { module = "aws.sdk.kotlin:s3", version.ref = "aws-sdk-version" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint-version" }
 ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint-version" }
 ktlint-rule-engine = { module = "com.pinterest.ktlint:ktlint-rule-engine", version.ref = "ktlint-version" }
