@@ -133,15 +133,15 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
                                 project.logger.info("No dependencies node found for native publication ${publication.name}")
                                 return@withXml
                             }
-                            
+
                             val deps = (depsNode.first() as groovy.util.Node).children()
-                            
+
                             deps.forEach { dep ->
                                 val node = dep as groovy.util.Node
                                 val artifactId = (node.get("artifactId") as? groovy.util.NodeList)
                                     ?.firstOrNull()
                                     ?.let { (it as groovy.util.Node).text() }
-                                
+
                                 if (artifactId != null && ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.any { artifactId.endsWith("-$it", ignoreCase = true) }) {
                                     val existingType = node.get("type") as? groovy.util.NodeList
                                     if (existingType == null || existingType.isEmpty()) {
