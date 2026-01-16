@@ -128,8 +128,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
                     // Add <type>klib</type> for Native platform dependencies
                     if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
                         withXml {
-                            val depsNode = asNode().get("dependencies")
-                            if (depsNode == null || (depsNode as groovy.util.NodeList).isEmpty()) {
+                            val depsNode = asNode().get("dependencies") as? groovy.util.NodeList
+                            if (depsNode == null || depsNode.isEmpty()) {
                                 project.logger.info("No dependencies node found for native publication ${publication.name}")
                                 return@withXml
                             }
