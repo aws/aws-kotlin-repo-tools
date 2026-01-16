@@ -68,11 +68,13 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         // 3) Evaluate
         when (result.deploymentState) {
             "PUBLISHING" -> logger.lifecycle("✅ Bundle validated by Maven Central")
+
             "FAILED" -> {
                 val reasons = result.errors?.values?.joinToString("\n- ", prefix = "\n- ")
                     ?: "\n(no error details returned)"
                 throw RuntimeException("❌ Sonatype deployment FAILED for ${result.deploymentId}$reasons")
             }
+
             else -> error("Unexpected terminal state: ${result.deploymentState}")
         }
     }

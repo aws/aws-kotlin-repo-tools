@@ -19,11 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.nexus.publish.plugin)
-    implementation(libs.jreleaser.plugin)
     compileOnly(gradleApi())
-    implementation(libs.aws.sdk.s3)
-    implementation(libs.aws.sdk.cloudwatch)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)

@@ -10,7 +10,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.konan.target.HostManager
 
-private val DEFAULT_SIMULATOR_DEVICE_NAME = "iPhone 16"
+private const val DEFAULT_SIMULATOR_DEVICE_NAME = "iPhone 16"
 
 /**
  * Disables standalone mode in simulator tests since it causes issues with TLS.
