@@ -61,10 +61,12 @@ abstract class SonatypeCentralPortalWaitForPublicationTask : DefaultTask() {
             "PUBLISHED" -> {
                 logger.lifecycle("🚀 Deployment PUBLISHED (deploymentId=$deploymentId)")
             }
+
             "FAILED" -> {
                 val reasons = result.errors?.values?.joinToString("\n- ", prefix = "\n- ") ?: "\n(no error details returned)"
                 throw RuntimeException("❌ Sonatype publication FAILED for $deploymentId$reasons")
             }
+
             else -> error("Unexpected terminal state: ${result.deploymentState}")
         }
     }
