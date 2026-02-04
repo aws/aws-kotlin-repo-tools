@@ -16,14 +16,14 @@ import org.gradle.plugins.signing.SigningExtension
 
 // FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
 
-private object Properties {
+object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
 
 private const val SIGNING_PUBLIC_KEY = "SIGNING_KEY"
 private const val SIGNING_SECRET_KEY = "SIGNING_PASSWORD"
 
-internal val ALLOWED_PUBLICATION_NAMES = setOf(
+val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
     "jvm",
     "kotlinMultiplatform",
