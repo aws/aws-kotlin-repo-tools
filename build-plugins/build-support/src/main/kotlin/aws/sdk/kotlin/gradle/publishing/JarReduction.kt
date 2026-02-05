@@ -22,10 +22,17 @@ fun Project.configureJarReduction(group: String): Set<Task> {
 
     subprojects {
         afterEvaluate {
-            val jarTask = tasks.findByName("jvmJar") ?: tasks.findByName("jar") ?: return@afterEvaluate
+            val jarTask = tasks.findByName("jvmJar") ?: tasks.findByName("jar")
+            if (jarTask == null) {
+                project.logger.debug("Skipping JAR reduction task configuration for project: ${project.name}. No JAR task detected.")
+                return@afterEvaluate
+            }
 
             // Don't reduce empty JARs, attempting it throws an exception.
-            if ((jarTask as Jar).source.isEmpty) return@afterEvaluate
+            if ((jarTask as Jar).source.isEmpty) {
+                project.logger.debug("Skipping JAR reduction task configuration for project: ${project.name}. Empty JAR detected.")
+                return@afterEvaluate
+            }
 
             val jar = jarTask.archiveFile
             val jarName = jar.get().asFile.name
