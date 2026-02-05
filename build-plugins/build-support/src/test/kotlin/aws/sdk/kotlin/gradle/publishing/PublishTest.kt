@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.dsl
+package aws.sdk.kotlin.gradle.publishing
 
 import kotlinx.coroutines.test.runTest
 import org.gradle.api.publish.PublishingExtension
