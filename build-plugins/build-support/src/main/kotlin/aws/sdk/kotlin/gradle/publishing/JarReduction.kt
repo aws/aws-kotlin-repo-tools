@@ -24,7 +24,7 @@ fun Project.configureJarReduction(group: String): Set<Task> {
         afterEvaluate {
             val jarTask = tasks.findByName("jvmJar") ?: tasks.findByName("jar")
             if (jarTask == null) {
-                project.logger.debug("Skipping JAR reduction task configuration for project: ${project.name}. No JAR task detected.")
+                project.logger.debug("Skipping JAR reduction task configuration for project: ${project.name}. No JAR task found.")
                 return@afterEvaluate
             }
 
@@ -63,22 +63,18 @@ fun Project.configureJarReduction(group: String): Set<Task> {
             val mavenPublications = extensions
                 .findByType(PublishingExtension::class.java)
                 ?.publications
-                ?.filter { publication ->
-                    publication is MavenPublication
-                }.let {
-                    if (it.isNullOrEmpty()) {
-                        return@afterEvaluate
-                    } else {
-                        it
-                    }
-                }
-            val kmpPublication = mavenPublications.any { it.name == "kotlinMultiplatform" }
-            val publicationName = if (kmpPublication) {
-                "jvm"
-            } else {
-                mavenPublications.first().name
+                ?.filter { it is MavenPublication }
+                ?.takeUnless { it.isEmpty() }
+            if (mavenPublications == null) {
+                project.logger.debug("Skipping reduced JAR artifact for project: ${project.name}. No Maven publication found.")
+                return@afterEvaluate
             }
-            if (publicationName !in ALLOWED_PUBLICATION_NAMES || extra.getOrNull<Boolean>(Properties.SKIP_PUBLISHING) == true) return@afterEvaluate
+            val kmpPublication = mavenPublications.any { it.name == "kotlinMultiplatform" }
+            val publicationName = if (kmpPublication) "jvm" else mavenPublications.first().name
+            if (publicationName !in ALLOWED_PUBLICATION_NAMES || extra.getOrNull<Boolean>(Properties.SKIP_PUBLISHING) == true) {
+                project.logger.debug("Skipping reduced JAR artifact for project: ${project.name}. Publication '$publicationName' not allowed.")
+                return@afterEvaluate
+            }
 
             extensions.configure<PublishingExtension> {
                 publications {
