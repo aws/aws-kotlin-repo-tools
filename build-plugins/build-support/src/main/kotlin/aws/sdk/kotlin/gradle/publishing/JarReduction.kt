@@ -17,18 +17,17 @@ import org.gradle.kotlin.dsl.register
 import proguard.gradle.ProGuardTask
 import java.io.File
 
-fun Project.configureJarReduction(group: String, emptyJarProjects: Set<String> = emptySet()): Set<Task> {
+fun Project.configureJarReduction(group: String): Set<Task> {
     val jarReplacementTasks = mutableSetOf<Task>()
 
     subprojects {
-        if (project.name in emptyJarProjects) {
-            // Don't reduce empty JARs, attempting it throws an exception.
-            return@subprojects
-        }
-
         afterEvaluate {
             val jarTask = tasks.findByName("jvmJar") ?: tasks.findByName("jar") ?: return@afterEvaluate
-            val jar = (jarTask as Jar).archiveFile
+
+            // Don't reduce empty JARs, attempting it throws an exception.
+            if ((jarTask as Jar).source.isEmpty) return@afterEvaluate
+
+            val jar = jarTask.archiveFile
             val jarName = jar.get().asFile.name
 
             val reduceJarSizeTask = tasks.register<ProGuardTask>("reduceJarSize") {
