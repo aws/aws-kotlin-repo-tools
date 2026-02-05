@@ -72,6 +72,12 @@ fun Project.skipPublishing() {
 }
 
 /**
+ * The location of the test local repo used for publishing in [configurePublishing]
+ */
+internal val Project.testLocalRepo
+    get() = rootProject.layout.buildDirectory.dir("m2").get().asFile
+
+/**
  * Configure publishing for this project. This applies the `maven-publish` and `signing` plugins and configures
  * the publications.
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
@@ -92,7 +98,7 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
         repositories {
             maven {
                 name = "testLocal"
-                url = rootProject.layout.buildDirectory.dir("m2").get().asFile.toURI()
+                url = testLocalRepo.toURI()
             }
         }
 

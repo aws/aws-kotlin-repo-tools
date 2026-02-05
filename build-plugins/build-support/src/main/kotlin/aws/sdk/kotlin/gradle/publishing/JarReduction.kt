@@ -91,21 +91,23 @@ fun Project.configureJarReduction(group: String): Set<Task> {
 
             val jarReplacementTask = tasks.register("replaceFullSizeJar") {
                 doLast {
-                    val mavenLocal = project.findProperty("mavenLocal") as String? == "true"
                     val suffix = if (kmpPublication) "-jvm" else ""
-                    val dir = if (mavenLocal) {
-                        "${System.getProperty("user.home")}/.m2/repository/$group/${project.name}$suffix/${project.version}"
+                    val pathToArtifacts = "$group/${project.name}$suffix/${project.version}"
+
+                    val mavenLocal = project.findProperty("mavenLocal") as String? == "true"
+                    val artifactsDir = if (mavenLocal) {
+                        "${repositories.mavenLocal().url.path}/$pathToArtifacts"
                     } else {
-                        "${rootProject.layout.buildDirectory.get()}/m2/$group/${project.name}$suffix/${project.version}"
+                        "${testLocalRepo.absolutePath}/$pathToArtifacts"
                     }
 
-                    File(dir)
+                    File(artifactsDir)
                         .listFiles()
                         .filter { it.isFile }
                         .forEach { artifact ->
                             if (artifact.name.startsWith(jarName)) {
                                 val reducedArtifactName = artifact.name.replace(".jar", "-reduced.jar")
-                                val reducedArtifact = file("$dir/$reducedArtifactName")
+                                val reducedArtifact = file("$artifactsDir/$reducedArtifactName")
 
                                 reducedArtifact.copyTo(artifact, overwrite = true)
                                 reducedArtifact.delete()
