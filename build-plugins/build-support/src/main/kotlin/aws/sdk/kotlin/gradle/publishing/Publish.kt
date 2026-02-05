@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.dsl
+package aws.sdk.kotlin.gradle.publishing
 
 import aws.sdk.kotlin.gradle.util.getOrNull
 import org.gradle.api.Project
@@ -16,14 +16,14 @@ import org.gradle.plugins.signing.SigningExtension
 
 // FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
 
-object Properties {
+internal object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
 
 private const val SIGNING_PUBLIC_KEY = "SIGNING_KEY"
 private const val SIGNING_SECRET_KEY = "SIGNING_PASSWORD"
 
-val ALLOWED_PUBLICATION_NAMES = setOf(
+internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
     "jvm",
     "kotlinMultiplatform",

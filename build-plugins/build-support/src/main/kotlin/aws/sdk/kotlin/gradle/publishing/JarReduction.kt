@@ -5,8 +5,6 @@
 
 package aws.sdk.kotlin.gradle.publishing
 
-import aws.sdk.kotlin.gradle.dsl.ALLOWED_PUBLICATION_NAMES
-import aws.sdk.kotlin.gradle.dsl.Properties
 import aws.sdk.kotlin.gradle.util.getOrNull
 import org.gradle.api.Project
 import org.gradle.api.Task
