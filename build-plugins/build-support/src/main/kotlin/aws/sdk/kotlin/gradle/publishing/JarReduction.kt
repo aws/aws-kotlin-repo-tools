@@ -19,7 +19,7 @@ import proguard.gradle.ProGuardTask
 import java.io.File
 
 fun Project.configureJarReduction(group: String) {
-    val testLocalJarReplacementTasks = mutableSetOf<Task>()
+    val testLocalJarDeletionTasks = mutableSetOf<Task>()
     val mavenLocalJarReplacementTasks = mutableSetOf<Task>()
 
     subprojects {
@@ -83,10 +83,15 @@ fun Project.configureJarReduction(group: String) {
                 }
             }
 
-            // Register JAR replacement - overwrite reduced JAR into base JAR
-            // Note: We must include the base JAR in our publication or else we have to build our own POM and .module files.
+            /**
+             * Registers JAR replacement tasks i.e. overwriting reduced JARs into base JARs.
+             * Note: We must include the base JAR in our publication or else we have to build our own POM and .module files.
+             *
+             * IMPORTANT: This function temporarily will delete reduced JARs for test local publications as we don't
+             * want to publish them to Maven Central until automated testing is complete.
+             */
             fun jarReplacementTask(mavenLocal: Boolean, kmpPublication: Boolean, jarName: String): TaskProvider<Task> {
-                val taskName = if (mavenLocal) "replaceMavenLocalFullSizeJar" else "replaceTestLocalFullSizeJar"
+                val taskName = if (mavenLocal) "replaceMavenLocalFullSizeJar" else "deleteTestLocalReducedJar"
                 return tasks.register(taskName) {
                     doLast {
                         val suffix = if (kmpPublication) "-jvm" else ""
@@ -103,22 +108,24 @@ fun Project.configureJarReduction(group: String) {
                                 if (artifact.name.startsWith(jarName)) {
                                     val reducedArtifactName = artifact.name.replace(".jar", "-reduced.jar")
                                     val reducedArtifact = file("$artifactsDir/$reducedArtifactName")
-
-                                    reducedArtifact.copyTo(artifact, overwrite = true)
+                                    // TODO: Lift this "copyTo" out of "if" statement when ready to publish reduced JARs to Maven Central
+                                    if (mavenLocal) {
+                                        reducedArtifact.copyTo(artifact, overwrite = true)
+                                    }
                                     reducedArtifact.delete()
                                 }
                             }
                     }
                 }
             }
-            testLocalJarReplacementTasks.add(jarReplacementTask(mavenLocal = false, kmpPublication, jarName).get())
+            testLocalJarDeletionTasks.add(jarReplacementTask(mavenLocal = false, kmpPublication, jarName).get())
             mavenLocalJarReplacementTasks.add(jarReplacementTask(mavenLocal = true, kmpPublication, jarName).get())
         }
     }
 
-    // Root project JAR replacement tasks
-    tasks.register("replaceTestLocalFullSizeJars") {
-        dependsOn(testLocalJarReplacementTasks)
+    // Root project JAR deletion/replacement tasks
+    tasks.register("deleteTestLocalReducedJars") {
+        dependsOn(testLocalJarDeletionTasks)
     }
     tasks.register("replaceMavenLocalFullSizeJars") {
         dependsOn(mavenLocalJarReplacementTasks)
