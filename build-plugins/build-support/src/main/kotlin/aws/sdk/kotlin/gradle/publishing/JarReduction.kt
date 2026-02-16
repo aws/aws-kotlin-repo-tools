@@ -52,6 +52,7 @@ fun Project.configureJarReduction(group: String) {
                     },
                 )
                 // ProGuard rules
+                // TODO: Optimize the classes we keep
                 keep("class * { *; }")
                 keepattributes("Signature,InnerClasses,EnclosingMethod,MethodParameters,*Annotation*")
                 keepparameternames()
@@ -69,7 +70,7 @@ fun Project.configureJarReduction(group: String) {
                 return@afterEvaluate
             }
             val kmpPublication = mavenPublications.any { it.name == "kotlinMultiplatform" }
-            val publicationName = if (kmpPublication) "jvm" else mavenPublications.first().name
+            val publicationName = if (kmpPublication) "jvm" else mavenPublications.single().name
             if (publicationName !in ALLOWED_PUBLICATION_NAMES || extra.getOrNull<Boolean>(Properties.SKIP_PUBLISHING) == true) {
                 project.logger.debug("Skipping reduced JAR artifact for project: ${project.name}. Publication '$publicationName' not allowed.")
                 return@afterEvaluate
@@ -78,14 +79,17 @@ fun Project.configureJarReduction(group: String) {
                 publications {
                     val publication = findByName(publicationName) as MavenPublication
                     publication.artifact(reduceJarSizeTask) {
-                        classifier = "reduced"
+                        classifier = "optimized"
                     }
                 }
             }
 
             /**
              * Registers JAR replacement tasks i.e. overwriting reduced JARs into base JARs.
+             *
              * Note: We must include the base JAR in our publication or else we have to build our own POM and .module files.
+             * The POM and .module files are built in `publishXtoY` tasks if the base JARs are included (`component["java"]` e.g. - the default artifacts)
+             * When we want to default to reduced JARs we won't want the base JARs to be published to Maven Central, but we want the POM and .module files to be created.
              *
              * IMPORTANT: This function temporarily will delete reduced JARs for test local publications as we don't
              * want to publish them to Maven Central until automated testing is complete.
@@ -103,17 +107,15 @@ fun Project.configureJarReduction(group: String) {
                         }
                         File(artifactsDir)
                             .listFiles()
-                            .filter { it.isFile }
+                            .filter { it.isFile && it.name.startsWith(jarName) }
                             .forEach { artifact ->
-                                if (artifact.name.startsWith(jarName)) {
-                                    val reducedArtifactName = artifact.name.replace(".jar", "-reduced.jar")
-                                    val reducedArtifact = file("$artifactsDir/$reducedArtifactName")
-                                    // TODO: Lift this "copyTo" out of "if" statement when ready to publish reduced JARs to Maven Central
-                                    if (mavenLocal) {
-                                        reducedArtifact.copyTo(artifact, overwrite = true)
-                                    }
-                                    reducedArtifact.delete()
+                                val reducedArtifactName = artifact.name.replace(".jar", "-optimized.jar")
+                                val reducedArtifact = file("$artifactsDir/$reducedArtifactName")
+                                // TODO: Lift this "copyTo" out of "if" statement when ready to publish reduced JARs to Maven Central
+                                if (mavenLocal) {
+                                    reducedArtifact.copyTo(artifact, overwrite = true)
                                 }
+                                reducedArtifact.delete()
                             }
                     }
                 }

@@ -14,8 +14,6 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 
-// FIXME Relocate this file to `aws.sdk.kotlin.gradle.publishing`
-
 internal object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
 }
