@@ -19,7 +19,7 @@ import proguard.gradle.ProGuardTask
 import java.io.File
 
 fun Project.configureJarReduction(group: String) {
-    val testLocalJarDeletionTasks = mutableSetOf<Task>()
+    val testLocalJarReplacementTasks = mutableSetOf<Task>()
     val mavenLocalJarReplacementTasks = mutableSetOf<Task>()
 
     subprojects {
@@ -90,12 +90,9 @@ fun Project.configureJarReduction(group: String) {
              * Note: We must include the base JAR in our publication or else we have to build our own POM and .module files.
              * The POM and .module files are built in `publishXtoY` tasks if the base JARs are included (`component["java"]` e.g. - the default artifacts)
              * When we want to default to reduced JARs we won't want the base JARs to be published to Maven Central, but we want the POM and .module files to be created.
-             *
-             * IMPORTANT: This function temporarily will delete reduced JARs for test local publications as we don't
-             * want to publish them to Maven Central until automated testing is complete.
              */
             fun jarReplacementTask(mavenLocal: Boolean, kmpPublication: Boolean, jarName: String): TaskProvider<Task> {
-                val taskName = if (mavenLocal) "replaceMavenLocalFullSizeJar" else "deleteTestLocalReducedJar"
+                val taskName = if (mavenLocal) "replaceMavenLocalFullSizeJar" else "replaceTestLocalFullSizeJar"
                 return tasks.register(taskName) {
                     doLast {
                         val suffix = if (kmpPublication) "-jvm" else ""
@@ -111,23 +108,20 @@ fun Project.configureJarReduction(group: String) {
                             .forEach { artifact ->
                                 val reducedArtifactName = artifact.name.replace(".jar", "-optimized.jar")
                                 val reducedArtifact = file("$artifactsDir/$reducedArtifactName")
-                                // TODO: Lift this "copyTo" out of "if" statement when ready to publish reduced JARs to Maven Central
-                                if (mavenLocal) {
-                                    reducedArtifact.copyTo(artifact, overwrite = true)
-                                }
+                                reducedArtifact.copyTo(artifact, overwrite = true)
                                 reducedArtifact.delete()
                             }
                     }
                 }
             }
-            testLocalJarDeletionTasks.add(jarReplacementTask(mavenLocal = false, kmpPublication, jarName).get())
+            testLocalJarReplacementTasks.add(jarReplacementTask(mavenLocal = false, kmpPublication, jarName).get())
             mavenLocalJarReplacementTasks.add(jarReplacementTask(mavenLocal = true, kmpPublication, jarName).get())
         }
     }
 
-    // Root project JAR deletion/replacement tasks
-    tasks.register("deleteTestLocalReducedJars") {
-        dependsOn(testLocalJarDeletionTasks)
+    // Root project JAR replacement tasks
+    tasks.register("replaceTestLocalFullSizeJars") {
+        dependsOn(testLocalJarReplacementTasks)
     }
     tasks.register("replaceMavenLocalFullSizeJars") {
         dependsOn(mavenLocalJarReplacementTasks)
