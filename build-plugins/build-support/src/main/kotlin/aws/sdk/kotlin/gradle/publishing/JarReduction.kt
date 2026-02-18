@@ -19,6 +19,9 @@ import proguard.gradle.ProGuardTask
 import java.io.File
 
 fun Project.configureJarReduction(group: String) {
+    val jarReductionEnabled = project.findProperty("aws.sdk.proguard") as String? == "true"
+    if (!jarReductionEnabled) return
+
     val testLocalJarReplacementTasks = mutableSetOf<Task>()
     val mavenLocalJarReplacementTasks = mutableSetOf<Task>()
 
@@ -120,6 +123,7 @@ fun Project.configureJarReduction(group: String) {
     }
 
     // Root project JAR replacement tasks
+    // TODO: Make these tasks run automatically after their respective publishing tasks
     tasks.register("replaceTestLocalFullSizeJars") {
         dependsOn(testLocalJarReplacementTasks)
     }
