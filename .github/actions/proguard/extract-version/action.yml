@@ -7,6 +7,8 @@ inputs:
     default: .
   version-name:
     description: The name of the version to extract e.g. 'crt-kotlin-version'
+  file-path:
+    description: The name of the file to look for the version in
 
 runs:
   using: composite
@@ -14,8 +16,8 @@ runs:
     - name: Extract version
       shell: bash
       run: |
-        echo "Looking for version of '${{inputs.version-name}}'"
-        version=$(awk -F'"' -v k="${{inputs.version-name}}" '$1 ~ "^"k"[[:space:]]*=" { print $2 }' gradle/libs.versions.toml)
+        echo "Looking for version '${{inputs.version-name}}' in '${{inputs.file-name}}'"
+        version=$(version=$(awk -F'=' -v k="${{inputs.version-name}}" '$1 ~ "^"k"[[:space:]]*" { gsub(/[[:space:]]*/, "", $2); gsub(/"/,"",$2); print $2 }' ${{inputs.file-path}}))
         echo "Found version '$version'"
 
     - name: Save version
