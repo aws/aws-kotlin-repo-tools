@@ -1,0 +1,30 @@
+name: Append to local.properties
+description: Appends the specified input to local.properties (creates file if it doesn't exist)
+
+inputs:
+  working-directory:
+    description: The path to local.properties root dir
+    default: .
+  addition:
+    description: What you want to add to local.properties
+
+runs:
+  using: composite
+  steps:
+    - name: Touch local.properties
+      working-directory: ${{inputs.working-directory}}
+      shell: bash
+      run: |
+        echo "Touching local.properties"
+        touch local.properties
+        echo "Running ls -al:"
+        ls -al
+
+    - name: Append to local.properties
+      working-directory: ${{inputs.working-directory}}
+      shell: bash
+      run: |
+        echo "Writing to local.properties"
+        echo "${{inputs.addition}}" >> local.properties
+        echo "File contents:"
+        cat local.properties
