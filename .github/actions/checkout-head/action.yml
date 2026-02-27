@@ -2,6 +2,7 @@ name: Checkout Head
 description: >
   Attempt to checkout a repository using the head ref. If it doesn't exist attempt to fallback to the 
   base ref. If it doesn't exist then use the default branch.
+  # TODO: Fall back to version configured by project instead of main
 
 inputs:
   fetch-depth:
