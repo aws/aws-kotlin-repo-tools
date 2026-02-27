@@ -14,6 +14,7 @@ runs:
   using: composite
   steps:
     - name: Extract version
+      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
         echo "Looking for version '${{inputs.version-name}}' in '${{inputs.file-name}}'"
@@ -21,6 +22,7 @@ runs:
         echo "Found version '$version'"
 
     - name: Save version
+      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
         echo "Saving version to GitHub output"
