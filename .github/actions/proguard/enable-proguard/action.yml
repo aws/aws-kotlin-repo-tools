@@ -10,6 +10,7 @@ runs:
   using: composite
   steps:
     - name: Create local.properties
+      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
         echo "Creating local.properties"
@@ -18,6 +19,7 @@ runs:
         ls
 
     - name: Enable ProGuard in local.properties
+      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
         echo "Writing to local.properties"
