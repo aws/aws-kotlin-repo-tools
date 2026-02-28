@@ -8,7 +8,7 @@ inputs:
   dependency:
     description: The dependency to update
   version:
-    description: The version to change the dependency too
+    description: The version to update the dependency to
 
 runs:
   using: composite
