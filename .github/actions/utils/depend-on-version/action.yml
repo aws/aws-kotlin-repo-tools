@@ -17,10 +17,13 @@ runs:
       working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
-        grep -q "${{inputs.dependency}}" gradle/libs.versions.toml || echo "Dependency '${{inputs.dependency}}' not found!"
+        echo "Looking for dependency '${{inputs.dependency}}'"
+        grep -q "${{inputs.dependency}}" gradle/libs.versions.toml || echo "Dependency not found"
+        echo "Dependency found"
 
     - name: Update dependency
       working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
+        echo "Updating depdendency '${{inputs.dependency}}' to '${{inputs.version}}'"
         sed -i '' 's/^${{inputs.dependency}} = ".*"/${{inputs.dependency}} = "${{inputs.version}}"/' gradle/libs.versions.toml
