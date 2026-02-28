@@ -1,0 +1,26 @@
+name: Depend on version
+description: Updates a libs.versions.toml dependency
+
+inputs:
+  working-directory:
+    description: The root directory of the project
+    default: .
+  dependency:
+    description: The dependency to update
+  version:
+    description: The version to change the dependency too
+
+runs:
+  using: composite
+  steps:
+    - name: Verify dependency exists
+      working-directory: ${{inputs.working-directory}}
+      shell: bash
+      run: |
+        grep -q "${{inputs.dependency}}" gradle/libs.versions.toml || echo "Dependency '${{inputs.dependency}}' not found!"
+
+    - name: Update dependency
+      working-directory: ${{inputs.working-directory}}
+      shell: bash
+      run: |
+        sed -i '' 's/^${{inputs.dependency}} = ".*"/${{inputs.dependency}} = "${{inputs.version}}"/' gradle/libs.versions.toml
