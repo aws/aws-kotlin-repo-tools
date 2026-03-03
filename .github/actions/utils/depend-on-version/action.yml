@@ -19,3 +19,5 @@ runs:
       run: |
         echo "Updating depdendency '${{inputs.dependency}}' to '${{inputs.version}}'"
         sed -i "s/^${{ inputs.dependency }} = \".*\"/${{ inputs.dependency }} = \"${{ inputs.version }}\"/" gradle/libs.versions.toml
+        echo "Dependency updated. Grepping 'libs.versions.toml':"
+        grep "${{inputs.dependency}}" gradle/libs.versions.toml
