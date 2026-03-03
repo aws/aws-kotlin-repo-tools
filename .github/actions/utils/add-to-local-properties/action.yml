@@ -14,26 +14,20 @@ runs:
     - name: Touch local.properties
       shell: bash
       run: |
-        echo "Running mkdir for working directory"
+        echo "Running 'mkdir -p' for '${{inputs.working-directory}}'"
         mkdir -p ${{inputs.working-directory}}
         
         echo "Changing dir to '${{inputs.working-directory}}'"
         cd ${{inputs.working-directory}}
         
-        echo "Touching local.properties"
+        echo "Touching 'local.properties'"
         touch local.properties
         
-        echo "Running ls -al:"
+        echo "Running 'ls -al':"
         ls -al
-
-    - name: Append to local.properties
-      shell: bash
-      run: |
-        echo "Changing dir to '${{inputs.working-directory}}'"
-        cd ${{inputs.working-directory}}
         
-        echo "Writing to local.properties"
+        echo "Writing '${{inputs.addition}}' to 'local.properties'"
         echo "${{inputs.addition}}" >> local.properties
         
-        echo "File contents:"
+        echo "'local.properties' contents:"
         cat local.properties
