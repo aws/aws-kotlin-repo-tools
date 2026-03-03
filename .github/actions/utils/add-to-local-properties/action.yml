@@ -27,9 +27,11 @@ runs:
         ls -al
 
     - name: Append to local.properties
-      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
+        echo "Changing dir to '${{inputs.working-directory}}'"
+        cd ${{inputs.working-directory}}
+        
         echo "Writing to local.properties"
         echo "${{inputs.addition}}" >> local.properties
         
