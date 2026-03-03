@@ -12,11 +12,17 @@ runs:
   using: composite
   steps:
     - name: Touch local.properties
-      working-directory: ${{inputs.working-directory}}
       shell: bash
       run: |
+        echo "Running mkdir for working directory
+        mkdir -p ${{inputs.working-directory}}
+        
+        echo "Changing dir to '${{inputs.working-directory}}'"
+        cd ${{inputs.working-directory}}
+        
         echo "Touching local.properties"
         touch local.properties
+        
         echo "Running ls -al:"
         ls -al
 
@@ -26,5 +32,6 @@ runs:
       run: |
         echo "Writing to local.properties"
         echo "${{inputs.addition}}" >> local.properties
+        
         echo "File contents:"
         cat local.properties
