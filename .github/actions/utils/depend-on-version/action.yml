@@ -19,7 +19,8 @@ runs:
       run: |
         echo "Looking for dependency '${{inputs.dependency}}'"
         grep -q "${{inputs.dependency}}" gradle/libs.versions.toml || echo "Dependency not found"
-        echo "Dependency found"
+        echo "Dependency found:"
+        echo "$(grep "${{ inputs.dependency }}" gradle/libs.versions.toml)" 
 
     - name: Update dependency
       working-directory: ${{inputs.working-directory}}
