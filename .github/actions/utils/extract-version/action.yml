@@ -1,5 +1,5 @@
-name: Extract version from libs.versions.toml
-description: Extracts the specified version from a libs.versions.toml file
+name: Extract version from a file
+description: Extracts the specified version from a file
 
 inputs:
   working-directory:
