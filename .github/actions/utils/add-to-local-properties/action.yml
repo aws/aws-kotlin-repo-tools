@@ -14,7 +14,7 @@ runs:
     - name: Touch local.properties
       shell: bash
       run: |
-        echo "Running mkdir for working directory
+        echo "Running mkdir for working directory"
         mkdir -p ${{inputs.working-directory}}
         
         echo "Changing dir to '${{inputs.working-directory}}'"
