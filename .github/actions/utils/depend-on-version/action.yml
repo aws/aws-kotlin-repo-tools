@@ -3,12 +3,12 @@ description: Updates a libs.versions.toml dependency
 
 inputs:
   working-directory:
-    description: The root directory of the project
+    description: Directory in which the action will run (must contain `gradle/libs.versions.toml`)
     default: .
   dependency:
-    description: The dependency to update
+    description: Name of the dependency to update in `libs.versions.toml`. Must match the exact key used in the file
   version:
-    description: The version to update the dependency to
+    description: The version string to assign to the specified dependency
 
 runs:
   using: composite
