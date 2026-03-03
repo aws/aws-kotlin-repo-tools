@@ -22,4 +22,4 @@ runs:
         echo "Found version '$version'"
         
         echo "Saving version to GitHub output"
-        echo "result='$version'" >> "$GITHUB_OUTPUT"
+        echo "result=test" >> "$GITHUB_OUTPUT"
