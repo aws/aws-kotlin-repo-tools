@@ -20,10 +20,5 @@ runs:
         echo "Looking for version '${{inputs.version-name}}' in '${{inputs.file-path}}'"
         version=$(awk -F'=' -v k="${{inputs.version-name}}" '$1 ~ "^"k"[[:space:]]*" { gsub(/[[:space:]]*/, "", $2); gsub(/"/,"",$2); print $2 }' ${{inputs.file-path}})
         echo "Found version '$version'"
-
-    - name: Save version
-      working-directory: ${{inputs.working-directory}}
-      shell: bash
-      run: |
         echo "Saving version to GitHub output"
         echo "result=$version" >> $GITHUB_OUTPUT
