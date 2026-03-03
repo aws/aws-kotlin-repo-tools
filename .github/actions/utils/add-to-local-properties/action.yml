@@ -27,7 +27,7 @@ runs:
         ls -al
         
         echo "Writing '${{inputs.addition}}' to 'local.properties'"
-        echo "${{inputs.addition}}" >> local.properties
+        echo -e "${{inputs.addition}}" >> local.properties
         
         echo "'local.properties' contents:"
         cat local.properties
