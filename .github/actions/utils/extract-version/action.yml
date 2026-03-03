@@ -3,14 +3,14 @@ description: Extracts the specified version from a libs.versions.toml file
 
 inputs:
   working-directory:
-    description: The directory in which to run the action
+    description: Directory in which the action will run
     default: .
   version-name:
-    description: The name of the version to extract e.g. 'crt-kotlin-version'
+    description: Name of the version to extract e.g. 'crt-kotlin-version'
   file-path:
-    description: The name of the file to look for the version in
+    description: Path to the file to search for the version in (relative to `working-directory`).
   output-path:
-    description: The path to a file (version.txt) that contains the found version
+    description: Directory where the version will be saved. The action writes the found version to 'version.txt' inside this directory
     default: .
 
 runs:
