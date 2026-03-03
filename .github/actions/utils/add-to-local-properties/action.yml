@@ -3,10 +3,10 @@ description: Appends the specified input to local.properties (creates file if it
 
 inputs:
   working-directory:
-    description: The path to local.properties root dir
+    description: Directory in which the action will run (must contain local.properties)
     default: .
   addition:
-    description: What you want to add to local.properties
+    description: The text to append to `local.properties`. Can include multiple lines; each append adds to the end of the file.
 
 runs:
   using: composite
