@@ -11,7 +11,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Touch local.properties
+    - name: Append to local.properties
       shell: bash
       run: |
         echo "Running 'mkdir -p' for '${{inputs.working-directory}}'"
