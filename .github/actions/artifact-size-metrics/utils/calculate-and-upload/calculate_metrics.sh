@@ -18,7 +18,7 @@ calculateArtifactSizes() {
 
       # remove dir path, version, optional timestamp, and .jar
       artifact=$(basename "$jar")
-      artifact=$(echo "$artifact" | sed -E 's/-[0-9]+(\.[0-9]+)*(-[0-9]{8}\.[0-9]+-[0-9]+)?(-SNAPSHOT)?\.jar$//')
+      artifact=$(echo "$artifact" | sed -E 's/\.jar$//; s/-[0-9]+(\.[0-9]+)*(-[0-9]{8}\.[0-9]+-[0-9]+)?(-SNAPSHOT)?//')
 
       # Add artifact size to CSV
       echo "$artifact, $size" >> "$output_file"
