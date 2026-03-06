@@ -1,0 +1,33 @@
+name: Append to local.properties
+description: Appends the specified input to local.properties (creates file if it doesn't exist)
+
+inputs:
+  working-directory:
+    description: Directory in which the action will run (must contain local.properties)
+    default: .
+  addition:
+    description: The text to append to `local.properties`. Can include multiple lines; each append adds to the end of the file.
+
+runs:
+  using: composite
+  steps:
+    - name: Append to local.properties
+      shell: bash
+      run: |
+        echo "Running 'mkdir -p' for '${{inputs.working-directory}}'"
+        mkdir -p ${{inputs.working-directory}}
+        
+        echo "Changing dir to '${{inputs.working-directory}}'"
+        cd ${{inputs.working-directory}}
+        
+        echo "Touching 'local.properties'"
+        touch local.properties
+        
+        echo "Running 'ls -al':"
+        ls -al
+        
+        echo "Writing '${{inputs.addition}}' to 'local.properties'"
+        echo -e "${{inputs.addition}}" >> local.properties
+        
+        echo "'local.properties' contents:"
+        cat local.properties
