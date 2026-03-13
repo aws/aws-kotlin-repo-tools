@@ -6,7 +6,6 @@
 package aws.sdk.kotlin.gradle.publishing
 
 import aws.sdk.kotlin.gradle.util.getOrNull
-import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.publish.PublishingExtension
@@ -20,9 +19,6 @@ import proguard.gradle.ProGuardTask
 import java.io.File
 
 fun Project.configureJarReduction(group: String) {
-    val jarReductionEnabled = prop("aws.sdk.proguard") as String? == "true"
-    if (!jarReductionEnabled) return
-
     val testLocalJarReplacementTasks = mutableSetOf<Task>()
     val mavenLocalJarReplacementTasks = mutableSetOf<Task>()
 
