@@ -22,6 +22,8 @@ fun Project.configureJarReduction(group: String) {
     val testLocalJarReplacementTasks = mutableSetOf<Task>()
     val mavenLocalJarReplacementTasks = mutableSetOf<Task>()
 
+    val validateJmodsTask = tasks.register<ValidateJmodsTask>("validateJmods")
+
     subprojects {
         afterEvaluate {
             // Filter out subprojects
@@ -39,6 +41,7 @@ fun Project.configureJarReduction(group: String) {
             val jar = jarTask.archiveFile
             val jarName = jar.get().asFile.name
             val reduceJarSizeTask = tasks.register<ProGuardTask>("reduceJarSize") {
+                dependsOn(validateJmodsTask)
                 dependsOn(jarTask)
                 injars(jar)
                 outjars(layout.buildDirectory.file("proguard/$jarName"))
