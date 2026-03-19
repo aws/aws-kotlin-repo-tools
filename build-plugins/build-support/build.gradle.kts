@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
+    compileOnly(libs.kotlin.gradle.plugin)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)

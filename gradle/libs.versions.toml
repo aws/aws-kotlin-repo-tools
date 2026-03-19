@@ -24,6 +24,7 @@ slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-version
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp-version" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-version" }
 proguard = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard-version" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
