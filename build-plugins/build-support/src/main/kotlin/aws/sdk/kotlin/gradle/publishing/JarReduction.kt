@@ -60,6 +60,7 @@ fun Project.configureJarReduction(group: String) {
                 keepattributes("Signature,InnerClasses,EnclosingMethod,MethodParameters,*Annotation*")
                 keepparameternames()
                 dontoptimize()
+                dontnote()
 
                 // Suppress warnings from multi-release JAR classes and Gradle Kotlin DSL internals
                 // https://www.guardsquare.com/manual/troubleshooting/troubleshooting#unresolvedclass
