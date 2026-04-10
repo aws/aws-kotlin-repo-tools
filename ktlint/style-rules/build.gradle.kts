@@ -21,7 +21,7 @@ kotlin {
         }
         test {
             dependencies {
-                implementation(kotlin("test"))
+                implementation(libs.kotlin.test)
                 implementation(libs.ktlint.rule.engine)
                 implementation(libs.slf4j.simple) // Required by ktlint rule engine tests
             }
