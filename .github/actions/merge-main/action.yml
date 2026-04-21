@@ -23,6 +23,8 @@ runs:
 
     - name: Run Script
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.ci-user-pat }}
       run: |
         input=${{ inputs.exempt-branches }}
 
@@ -81,6 +83,35 @@ runs:
 
         filter_feature_branches
 
+        function open_merge_pr() {
+          local branch=$1
+
+          # Check if there's already an auto-merge PR from main into this branch
+          local pr_number
+          pr_number=$(gh pr list --head main --base "$branch" --state open --label auto-merge --json number --jq '.[0].number')
+
+          if [ -n "$pr_number" ]; then
+            echo "...open PR #$pr_number already exists, checking if mergeable"
+            local mergeable
+            mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable')
+
+            if [ "$mergeable" == "MERGEABLE" ]; then
+              echo "...PR is mergeable, merging"
+              gh pr merge "$pr_number" --merge --delete-branch=false
+            else
+              echo "...PR still has conflicts, skipping"
+            fi
+          else
+            echo "...opening PR from main into $branch"
+            gh pr create \
+              --base "$branch" \
+              --head main \
+              --title "misc: merge main into $branch" \
+              --label auto-merge \
+              --body "Automated merge of main into \`$branch\` failed due to conflicts. Please resolve manually."
+          fi
+        }
+
         function merge_main() {
           echo "Merging main into branches"
 
@@ -88,8 +119,6 @@ runs:
             echo "...no branches to merge into"
             return
           fi
-
-          failed="false"
 
           for branch in "${branches[@]}"; do
             echo "...switching to branch: $branch"
@@ -99,15 +128,11 @@ runs:
               echo "...pushing to origin"
               git push origin "$branch"
             else
-              echo "...merge failed"
-              failed="true"
+              echo "...merge failed, opening PR for manual resolution"
               git merge --abort
+              open_merge_pr "$branch"
             fi
           done
-          
-          if [ "$failed" == "true" ]; then
-            exit 1
-          fi
         }
 
         merge_main
