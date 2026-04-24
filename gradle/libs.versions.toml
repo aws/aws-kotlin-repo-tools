@@ -1,5 +1,5 @@
 [versions]
-kotlin-version = "2.3.20"
+kotlin-version = "2.3.21"
 ktlint-version = "1.8.0"
 publish-plugin-version = "2.1.1"
 smithy-version = "1.69.0"
