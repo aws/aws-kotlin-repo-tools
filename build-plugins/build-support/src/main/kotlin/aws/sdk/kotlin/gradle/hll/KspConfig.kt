@@ -37,7 +37,7 @@ fun Project.configureKspCodegen(kspProjects: List<String>) {
     }
 
     // Move the generated KSP source from jvm to common
-    tasks.register("moveGenSrc") {
+    val moveGenSrc = tasks.register("moveGenSrc") {
         // Can't move source until it's generated
         dependsOn(tasks.named("kspKotlinJvm"))
 
@@ -63,10 +63,16 @@ fun Project.configureKspCodegen(kspProjects: List<String>) {
 
     // Ensure all source jar tasks depend on the generated source move
     tasks.matching { it.name.endsWith("SourcesJar", ignoreCase = true) || it.name == "jvmProcessResources" }.configureEach {
-        dependsOn("moveGenSrc")
+        dependsOn(moveGenSrc)
     }
+
+    // Ensure all Dokka tasks depend on the generated source move
+    tasks.matching { it.name.startsWith("dokka", ignoreCase = true) }.configureEach {
+        dependsOn(moveGenSrc)
+    }
+
     tasks.withType(KotlinCompilationTask::class.java) {
-        dependsOn("moveGenSrc")
+        dependsOn(moveGenSrc)
     }
 
     // Finally, wire up the generated source to the commonMain source set
