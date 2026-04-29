@@ -131,7 +131,7 @@ runs:
             else
               echo "...merge failed, creating merge branch for manual resolution"
               git merge --abort
-              local merge_branch="merge-main-into-$branch-merge"
+              local merge_branch="main-into-$branch-merge"
               if git rev-parse --verify "refs/remotes/origin/$merge_branch" &>/dev/null; then
                 echo "...merge branch $merge_branch already exists, updating"
                 git switch "$merge_branch"
