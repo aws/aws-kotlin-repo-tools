@@ -19,6 +19,7 @@ runs:
       run: |
         curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
         sudo installer -pkg AWSCLIV2.pkg -target /
+        rm -f AWSCLIV2.pkg
     - name: Install AWS CLI (Windows)
       if: runner.os == 'Windows'
       shell: powershell
