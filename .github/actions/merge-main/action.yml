@@ -88,25 +88,24 @@ runs:
           local merge_branch=$2
 
           # Open PR if one doesn't already exist
-          local pr_number
-          pr_number=$(gh pr list --head "$merge_branch" --base "$base_branch" --state open --label auto-merge --json number --jq '.[0].number')
+          local pr_ref
+          pr_ref=$(gh pr list --head "$merge_branch" --base "$base_branch" --state open --label auto-merge --json number --jq '.[0].number')
 
-          if [ -z "$pr_number" ]; then
+          if [ -z "$pr_ref" ]; then
             echo "...opening PR from $merge_branch into $base_branch"
-            pr_number=$(gh pr create \
+            pr_ref=$(gh pr create \
               --base "$base_branch" \
               --head "$merge_branch" \
               --title "misc: merge main into $base_branch" \
               --label auto-merge \
-              --body "Automated merge of main into \`$base_branch\`. If there are conflicts, please resolve manually." \
-              | grep -oE '[0-9]+$')
+              --body "Automated merge of main into \`$base_branch\`. If there are conflicts, please resolve manually.")
           else
-            echo "...PR #$pr_number already exists"
+            echo "...PR #$pr_ref already exists"
           fi
 
           # Enable auto-merge (fails gracefully if conflicts exist)
-          echo "...enabling auto-merge on PR #$pr_number"
-          gh pr merge "$pr_number" --merge --delete-branch --auto || echo "...auto-merge could not be enabled (likely conflicts), skipping"
+          echo "...enabling auto-merge on $pr_ref"
+          gh pr merge "$pr_ref" --merge --delete-branch --auto || echo "...auto-merge could not be enabled (likely conflicts), skipping"
         }
 
         function merge_main() {
