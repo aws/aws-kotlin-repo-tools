@@ -83,34 +83,29 @@ runs:
 
         filter_feature_branches
 
-        function open_merge_pr() {
+        function open_pr_and_merge() {
           local base_branch=$1
           local merge_branch=$2
 
-          # Check if there's already an auto-merge PR into this branch
-          local pr_number
-          pr_number=$(gh pr list --head "$merge_branch" --base "$base_branch" --state open --label auto-merge --json number --jq '.[0].number')
+          # Open PR if one doesn't already exist
+          local pr_ref
+          pr_ref=$(gh pr list --head "$merge_branch" --base "$base_branch" --state open --label auto-merge --json number --jq '.[0].number')
 
-          if [ -n "$pr_number" ]; then
-            echo "...open PR #$pr_number already exists, checking if mergeable"
-            local mergeable
-            mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable')
-
-            if [ "$mergeable" == "MERGEABLE" ]; then
-              echo "...PR is mergeable, merging"
-              gh pr merge "$pr_number" --merge --delete-branch
-            else
-              echo "...PR still has conflicts, skipping"
-            fi
-          else
+          if [ -z "$pr_ref" ]; then
             echo "...opening PR from $merge_branch into $base_branch"
-            gh pr create \
+            pr_ref=$(gh pr create \
               --base "$base_branch" \
               --head "$merge_branch" \
               --title "misc: merge main into $base_branch" \
               --label auto-merge \
-              --body "Automated merge of main into \`$base_branch\` failed due to conflicts. Please resolve manually."
+              --body "Automated merge of main into \`$base_branch\`. If there are conflicts, please resolve manually.")
+          else
+            echo "...PR #$pr_ref already exists"
           fi
+
+          # Enable auto-merge (fails gracefully if conflicts exist)
+          echo "...enabling auto-merge on $pr_ref"
+          gh pr merge "$pr_ref" --merge --delete-branch --auto || echo "...auto-merge could not be enabled (likely conflicts), skipping"
         }
 
         function merge_main() {
@@ -122,26 +117,20 @@ runs:
           fi
 
           for branch in "${branches[@]}"; do
-            echo "...switching to branch: $branch"
-            git switch "$branch"
-            echo "...merging main"
-            if git merge -m "misc: merge from main" origin/main; then
-              echo "...pushing to origin"
-              git push origin "$branch"
+            echo "...processing branch: $branch"
+            local merge_branch="main-into-$branch-merge"
+
+            if git rev-parse --verify "refs/remotes/origin/$merge_branch" &>/dev/null; then
+              echo "...merge branch $merge_branch already exists, updating"
+              git switch "$merge_branch"
+              git reset --hard origin/main
             else
-              echo "...merge failed, creating merge branch for manual resolution"
-              git merge --abort
-              local merge_branch="main-into-$branch-merge"
-              if git rev-parse --verify "refs/remotes/origin/$merge_branch" &>/dev/null; then
-                echo "...merge branch $merge_branch already exists, updating"
-                git switch "$merge_branch"
-                git reset --hard origin/main
-              else
-                git switch -c "$merge_branch" origin/main
-              fi
-              git push -u --force-with-lease origin "$merge_branch"
-              open_merge_pr "$branch" "$merge_branch"
+              echo "...creating merge branch $merge_branch"
+              git switch -c "$merge_branch" origin/main
             fi
+
+            git push -u --force-with-lease origin "$merge_branch"
+            open_pr_and_merge "$branch" "$merge_branch"
           done
         }
 
