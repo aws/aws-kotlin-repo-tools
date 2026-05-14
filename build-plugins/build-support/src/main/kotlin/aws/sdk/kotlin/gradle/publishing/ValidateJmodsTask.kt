@@ -5,10 +5,12 @@
 package aws.sdk.kotlin.gradle.publishing
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.TaskAction
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
+@CacheableTask
 abstract class ValidateJmodsTask : DefaultTask() {
     @TaskAction
     fun validate() {
