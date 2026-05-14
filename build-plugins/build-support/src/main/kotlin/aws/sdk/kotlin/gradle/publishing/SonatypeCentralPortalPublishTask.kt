@@ -15,14 +15,17 @@ import kotlin.io.path.exists
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTimedValue
 
 /**
  * Publishes a bundle to Sonatype Portal and waits for it to be validated (but not fully published).
  * States: PENDING, VALIDATING, VALIDATED, FAILED
  * https://central.sonatype.org/publish/publish-portal-api/
  */
+@CacheableTask
 abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val bundle: RegularFileProperty
 
     @Option(option = "bundle", description = "Path to bundle")
@@ -48,34 +51,40 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
 
     @TaskAction
     fun run() {
-        val client = SonatypeCentralPortalClient.fromEnvironment()
-        val file = bundle.asFile.get()
+        val (result, time) = measureTimedValue {
+            val client = SonatypeCentralPortalClient.fromEnvironment()
+            val file = bundle.asFile.get()
 
-        // 1) Upload
-        val deploymentId = client.uploadBundle(file, file.name)
-        logger.lifecycle("📤 Uploaded bundle; deploymentId=$deploymentId")
+            // 1) Upload
+            val deploymentId = client.uploadBundle(file, file.name)
+            logger.lifecycle("📤 Uploaded bundle; deploymentId=$deploymentId")
 
-        // 2) Wait for PUBLISHING (which comes after VALIDATING) or FAILED
-        val result = client.waitForStatus(
-            deploymentId = deploymentId,
-            terminalStates = setOf("PUBLISHING", "FAILED"),
-            pollInterval = pollInterval.get(),
-            timeout = timeoutDuration.get(),
-        ) { _, new ->
-            logger.lifecycle("📡 Status: $new (deploymentId=$deploymentId)")
+            // 2) Wait for PUBLISHING (which comes after VALIDATING) or FAILED
+            client.waitForStatus(
+                deploymentId = deploymentId,
+                terminalStates = setOf("PUBLISHING", "FAILED"),
+                pollInterval = pollInterval.get(),
+                timeout = timeoutDuration.get(),
+            ) { _, new ->
+                logger.lifecycle("📡 Status: $new (deploymentId=$deploymentId)")
+            }
         }
 
         // 3) Evaluate
-        when (result.deploymentState) {
-            "PUBLISHING" -> logger.lifecycle("✅ Bundle validated by Maven Central")
+        try {
+            when (result.deploymentState) {
+                "PUBLISHING" -> logger.lifecycle("✅ Bundle validated by Maven Central")
 
-            "FAILED" -> {
-                val reasons = result.errors?.values?.joinToString("\n- ", prefix = "\n- ")
-                    ?: "\n(no error details returned)"
-                throw RuntimeException("❌ Sonatype deployment FAILED for ${result.deploymentId}$reasons")
+                "FAILED" -> {
+                    val reasons = result.errors?.values?.joinToString("\n- ", prefix = "\n- ")
+                        ?: "\n(no error details returned)"
+                    throw RuntimeException("❌ Sonatype deployment FAILED for ${result.deploymentId}$reasons")
+                }
+
+                else -> error("💥 Unexpected terminal state: ${result.deploymentState}")
             }
-
-            else -> error("Unexpected terminal state: ${result.deploymentState}")
+        } finally {
+            logger.lifecycle("⏱️ Completed in $time")
         }
     }
 }
