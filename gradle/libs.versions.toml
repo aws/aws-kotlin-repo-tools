@@ -2,7 +2,7 @@
 kotlin-version = "2.3.21"
 ktlint-version = "1.8.0"
 publish-plugin-version = "2.1.1"
-smithy-version = "1.70.0"
+smithy-version = "1.71.0"
 smithy-gradle-plugin-version = "1.4.0"
 coroutines-version = "1.11.0"
 slf4j-version = "2.0.18"
