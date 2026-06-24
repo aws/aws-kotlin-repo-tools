@@ -98,6 +98,7 @@ runs:
               --head "$merge_branch" \
               --title "misc: merge main into $base_branch" \
               --label auto-merge \
+              --label no-changelog \
               --body "Automated merge of main into \`$base_branch\`. If there are conflicts, please resolve manually.")
           else
             echo "...PR #$pr_ref already exists"
