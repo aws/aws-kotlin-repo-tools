@@ -83,6 +83,11 @@ runs:
 
         filter_feature_branches
 
+        label_flags=(--label auto-merge)
+        if gh label list --search "no-changelog" --json name --jq '.[].name' | grep -q "^no-changelog$"; then
+          label_flags+=(--label no-changelog)
+        fi
+
         function open_pr_and_merge() {
           local base_branch=$1
           local merge_branch=$2
@@ -97,8 +102,7 @@ runs:
               --base "$base_branch" \
               --head "$merge_branch" \
               --title "misc: merge main into $base_branch" \
-              --label auto-merge \
-              --label no-changelog \
+              "${label_flags[@]}" \
               --body "Automated merge of main into \`$base_branch\`. If there are conflicts, please resolve manually.")
           else
             echo "...PR #$pr_ref already exists"
