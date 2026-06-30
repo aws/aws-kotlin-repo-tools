@@ -38,12 +38,13 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.token }}
         REPOSITORY: ${{ inputs.repository }}
+        MERGE_GROUP_BASE_REF: ${{ github.event.merge_group.base_ref }}
       run: |
         ref="$GITHUB_REF"
         if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
           ref="$GITHUB_HEAD_REF"
         fi
-        
+
         if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$ref"; then
           echo "::notice ::Checkout Head: using '$ref' for $REPOSITORY"
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
@@ -55,6 +56,12 @@ runs:
             echo "attempting GH base ref: $GITHUB_BASE_REF"
             if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$GITHUB_BASE_REF"; then
               baseref="$GITHUB_BASE_REF"
+            fi
+          elif [ -n "$MERGE_GROUP_BASE_REF" ]; then
+            merge_group_branch="${MERGE_GROUP_BASE_REF#refs/heads/}"
+            echo "attempting merge_group base ref: $merge_group_branch"
+            if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$merge_group_branch"; then
+              baseref="$merge_group_branch"
             fi
           fi
           echo "::notice ::Checkout Head: $REPOSITORY does not have the head ref '$ref', using base '$baseref'"
