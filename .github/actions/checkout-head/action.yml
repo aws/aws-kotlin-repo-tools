@@ -43,6 +43,14 @@ runs:
         ref="$GITHUB_REF"
         if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
           ref="$GITHUB_HEAD_REF"
+        elif [ "$GITHUB_EVENT_NAME" = "merge_group" ]; then
+          pr_number=$(echo "$GITHUB_REF" | sed -n 's|.*/pr-\([0-9]*\)-.*|\1|p')
+          if [ -n "$pr_number" ]; then
+            head_branch=$(gh pr view "$pr_number" --json headRefName --jq '.headRefName' 2>/dev/null || true)
+            if [ -n "$head_branch" ]; then
+              ref="$head_branch"
+            fi
+          fi
         fi
 
         if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$ref"; then
