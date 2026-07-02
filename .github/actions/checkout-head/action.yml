@@ -45,8 +45,11 @@ runs:
           ref="$GITHUB_HEAD_REF"
         elif [ "$GITHUB_EVENT_NAME" = "merge_group" ]; then
           pr_number=$(echo "$GITHUB_REF" | sed -n 's|.*/pr-\([0-9]*\)-.*|\1|p')
+          echo "extracted PR number: $pr_number"
           if [ -n "$pr_number" ]; then
-            head_branch=$(gh pr view "$pr_number" --json headRefName --jq '.headRefName' 2>/dev/null || true)
+            echo "querying head branch for PR #$pr_number in $GITHUB_REPOSITORY"
+            head_branch=$(gh pr view "$pr_number" --repo "$GITHUB_REPOSITORY" --json headRefName --jq '.headRefName' || true)
+            echo "resolved head branch: $head_branch"
             if [ -n "$head_branch" ]; then
               ref="$head_branch"
             fi
