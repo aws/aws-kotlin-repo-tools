@@ -11,7 +11,7 @@ import software.amazon.smithy.model.node.ObjectNode
 /**
  * A container for settings related to a single Smithy projection.
  *
- * See https://smithy.io/1.0/guides/building-models/build-config.html#projections
+ * See https://smithy.io/2.0/guides/smithy-build-json.html#projections
  *
  * @param name the name of the projection
  */
@@ -30,7 +30,7 @@ class SmithyProjection(val name: String) {
     /**
      * A list of transforms to apply
      *
-     * See https://smithy.io/1.0/guides/building-models/build-config.html#transforms
+     * See https://smithy.io/2.0/guides/smithy-build-json.html#transforms
      */
     var transforms: List<String> = emptyList()
 

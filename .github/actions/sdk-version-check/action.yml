@@ -23,7 +23,8 @@ runs:
         head_version=$(grep '^sdkVersion=' "${{ inputs.gradle-properties-path }}" | head -1)
 
         if [ "$base_version" != "$head_version" ]; then
-          echo "::error ::sdkVersion in ${{ inputs.gradle-properties-path }} has been changed."
+          echo "::error ::sdkVersion in ${{ inputs.gradle-properties-path }} has been changed in this PR."
+          echo "::error ::This value SHOULD NOT be changed manually in most scenarios, including regular releases and minor version bumps, since it is automatically handled by release tooling."
           echo "::error ::Base: $base_version"
           echo "::error ::Head: $head_version"
           echo "::error ::If this is intentional, add the 'acknowledge-sdk-version-change' label to this PR."
