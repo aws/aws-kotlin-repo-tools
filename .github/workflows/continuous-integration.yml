@@ -7,6 +7,8 @@ on:
     branches:
       - main
       - 'feat-*'
+  merge_group:
+    types: [checks_requested]
   workflow_dispatch:
 
 permissions: { }

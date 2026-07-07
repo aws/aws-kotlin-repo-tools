@@ -50,7 +50,7 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
           PATCH_SUFFIX=${PATCH#$PATCH_NUMBER}
-          ((PATCH_NUMBER++))
+          PATCH_NUMBER=$((PATCH_NUMBER + 1))
           echo "NEW_VERSION=$MAJOR.$MINOR.$PATCH_NUMBER$PATCH_SUFFIX" >> "$GITHUB_OUTPUT"
 
       - name: Create new version tag
