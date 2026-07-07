@@ -1,0 +1,31 @@
+name: 'SDK Version Check'
+description: 'Fails if sdkVersion in gradle.properties is changed without the acknowledge-sdk-version-change label'
+
+inputs:
+  gradle-properties-path:
+    description: 'Path to the gradle.properties file to check'
+    required: false
+    default: 'gradle.properties'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+
+    - name: Check sdkVersion change
+      if: ${{ !contains(github.event.pull_request.labels.*.name, 'acknowledge-sdk-version-change') }}
+      shell: bash
+      run: |
+        git fetch origin ${{ github.base_ref }} --depth 1
+
+        base_version=$(git show "remotes/origin/${{ github.base_ref }}:${{ inputs.gradle-properties-path }}" | grep '^sdkVersion=' | head -1)
+        head_version=$(grep '^sdkVersion=' "${{ inputs.gradle-properties-path }}" | head -1)
+
+        if [ "$base_version" != "$head_version" ]; then
+          echo "::error ::sdkVersion in ${{ inputs.gradle-properties-path }} has been changed."
+          echo "::error ::Base: $base_version"
+          echo "::error ::Head: $head_version"
+          echo "::error ::If this is intentional, add the 'acknowledge-sdk-version-change' label to this PR."
+          exit 1
+        fi
