@@ -2,9 +2,9 @@
 
 This repository contains shared tooling for AWS Kotlin repositories:
 
-* `awslabs/aws-sdk-kotlin`
+* `aws/aws-sdk-kotlin`
 * `smithy-lang/smithy-kotlin`
-* `awslabs/aws-crt-kotlin`
+* `aws/aws-crt-kotlin`
 
 It contains shared custom Gradle plugins and build logic used to build and release those repositories.
 
