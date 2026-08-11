@@ -75,6 +75,11 @@ fun Project.configureKspCodegen(kspProjects: List<String>) {
         dependsOn(moveGenSrc)
     }
 
+    // All KSP tasks except `kspKotlinJvm` (which `moveGenSrc` depends on) must depend on the move
+    tasks.matching { it.name.startsWith("ksp", ignoreCase = true) && it.name != "kspKotlinJvm" }.configureEach {
+        dependsOn(moveGenSrc)
+    }
+
     // Finally, wire up the generated source to the commonMain source set
     extensions
         .getByType(KotlinMultiplatformExtension::class.java)
