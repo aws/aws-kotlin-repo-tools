@@ -134,6 +134,15 @@ runs:
               git switch -c "$merge_branch" origin/main
             fi
 
+            # Resetting to origin/main makes every merge branch point at the same commit. GitHub
+            # keys check runs and commit statuses to a commit SHA rather than to a PR, so all the
+            # merge PRs would then share one set of CI results: each PR displays the others' checks,
+            # and a failure on any one of them blocks all the rest. This empty commit gives each
+            # merge branch a distinct head commit (the message embeds the branch name). The tree is
+            # unchanged, so the merge these PRs perform is exactly the same as before.
+            echo "...adding a marker commit so $merge_branch does not share main's SHA"
+            git commit --allow-empty -m "misc: merge main into $branch"
+
             git push -u --force-with-lease origin "$merge_branch"
             open_pr_and_merge "$branch" "$merge_branch"
           done
