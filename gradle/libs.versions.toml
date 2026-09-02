@@ -2,13 +2,13 @@
 kotlin-version = "2.4.0"
 ktlint-version = "1.8.0"
 publish-plugin-version = "2.1.1"
-smithy-version = "1.72.0"
-smithy-gradle-plugin-version = "1.4.0"
+smithy-version = "1.73.0"
+smithy-gradle-plugin-version = "1.5.0"
 coroutines-version = "1.11.0"
 slf4j-version = "2.0.18"
-okhttp-version = "5.4.0"
+okhttp-version = "5.5.0"
 kotlinx-serialization-version = "1.11.0"
-proguard-version = "7.9.1"
+proguard-version = "7.10.0"
 
 [libraries]
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint-version" }
