@@ -1,11 +1,24 @@
 name: 'Changelog Verification'
 description: 'Verifies that a PR includes a valid changelog entry'
 
+inputs:
+  ref:
+    description: >
+      The ref (commit SHA) to check out. When empty (same-repo `pull_request` or
+      `merge_group`) the default checkout behavior is used. Under the privileged
+      `pull_request_target` path this MUST be set to the reviewed fork head SHA
+      (github.event.pull_request.head.sha) so the contributor's commit is verified
+      rather than the base branch.
+    required: false
+    default: ''
+
 runs:
   using: "composite"
   steps:
     - name: Checkout sources
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
 
     - name: Setup kat
       uses: aws/aws-kotlin-repo-tools/.github/actions/setup-kat@main
