@@ -34,10 +34,13 @@ val Project.hasCommon: Boolean get() = files.any {
 
 // always configured with common
 val Project.hasJvm: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "jvm" }
-val Project.hasNative: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "native" }
+val Project.hasNative: Boolean get() = hasCommon || hasJvmAndNative || hasNonJvm || files.any { it.name == "native" }
 val Project.hasJs: Boolean get() = hasCommon || files.any { it.name == "js" }
 val Project.hasJvmAndNative: Boolean get() = hasCommon || files.any { it.name == "jvmAndNative" }
-val Project.hasWasmJs: Boolean get() = hasCommon || files.any { it.name == "wasmJs" }
+val Project.hasWasmJs: Boolean get() = hasCommon || hasNonJvm || files.any { it.name == "wasmJs" }
+
+/** Code shared by native and wasmJs targets; only for modules with a nonJvm/ folder. */
+val Project.hasNonJvm: Boolean get() = files.any { it.name == "nonJvm" }
 
 // less frequent, more explicit targets
 val Project.hasDesktop: Boolean get() = hasNative || files.any { it.name == "desktop" }
@@ -50,7 +53,7 @@ val Project.hasPosix: Boolean get() = hasNative || hasJvmAndNative || files.any 
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasWasmJs || hasDesktop || hasLinux || hasApple || hasWindows || hasPosix
+val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasWasmJs || hasNonJvm || hasDesktop || hasLinux || hasApple || hasWindows || hasPosix
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
@@ -78,6 +81,16 @@ fun Project.configureKmpTargets() {
                     group("jvmAndNative") {
                         withJvm()
                         withNative()
+                    }
+                }
+            }
+
+            if (hasNonJvm) {
+                common {
+                    // nest the existing native group so nativeMain depends on nonJvmMain
+                    group("nonJvm") {
+                        group("native")
+                        withWasmJs()
                     }
                 }
             }
