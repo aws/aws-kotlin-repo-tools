@@ -33,6 +33,9 @@ dependencies {
     testImplementation(libs.dokka.base)
     testImplementation(libs.dokka.core)
     testImplementation(libs.dokka.templating.plugin)
+
+    // Headless browser that runs navigation-loader.js in tests. Requires Java 17, so tests target 17 (see below).
+    testImplementation(libs.htmlunit)
 }
 
 tasks.withType<Test>().configureEach {
@@ -41,15 +44,18 @@ tasks.withType<Test>().configureEach {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
-        freeCompilerArgs.add("-Xjdk-release=1.8")
+        // The published plugin targets Java 8; test code targets 17 for HtmlUnit.
+        val testCompile = name.contains("Test")
+        jvmTarget.set(if (testCompile) JvmTarget.JVM_17 else JvmTarget.JVM_1_8)
+        freeCompilerArgs.add(if (testCompile) "-Xjdk-release=17" else "-Xjdk-release=1.8")
         allWarningsAsErrors.set(false) // Dokka bundles stdlib into the classpath, causing an unfixable warning
     }
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    val version = if (name.contains("Test")) JavaVersion.VERSION_17 else JavaVersion.VERSION_1_8
+    sourceCompatibility = version.toString()
+    targetCompatibility = version.toString()
 }
 
 // Publish the plugin jar so consuming repos can resolve it as a Dokka plugin dependency. group
