@@ -11,6 +11,7 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -22,7 +23,7 @@ class SonatypeCentralPortalPublishTaskTest {
         val task = project.tasks.register("publishToCentralPortal", SonatypeCentralPortalPublishTask::class.java).get()
 
         assertEquals(2.hours, task.timeoutDuration.get())
-        assertEquals(1024L * 1024 * 1024, task.maxBundleSizeBytes.get())
+        assertNull(task.maxBundleSizeBytes.orNull)
     }
 
     @Test
@@ -48,7 +49,7 @@ class SonatypeCentralPortalPublishTaskTest {
     }
 
     @Test
-    fun `bundle size check fails fast above the limit and cites the documented limit`() {
+    fun `bundle size check fails fast above the limit`() {
         val bundle = Files.createTempFile("bundle", ".zip").toFile()
         try {
             RandomAccessFile(bundle, "rw").use { it.setLength(2048) }
@@ -56,7 +57,7 @@ class SonatypeCentralPortalPublishTaskTest {
             checkBundleSize(bundle, 2048)
             val e = assertFailsWith<IllegalStateException> { checkBundleSize(bundle, 2047) }
             assertTrue(e.message!!.contains("2048 bytes"), e.message)
-            assertTrue(e.message!!.contains("https://central.sonatype.org/publish/publish-portal-upload/"), e.message)
+            assertTrue(e.message!!.contains(SonatypeCentralPortalPublishTask.MAX_BUNDLE_SIZE_PROPERTY), e.message)
         } finally {
             bundle.delete()
         }

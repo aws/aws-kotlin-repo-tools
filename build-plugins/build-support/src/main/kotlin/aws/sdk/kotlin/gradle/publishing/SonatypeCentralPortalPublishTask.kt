@@ -46,7 +46,7 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
 
     /**
      * Max bundle size in bytes, checked before uploading. Defaults to the
-     * `aws.sonatype.centralPortal.maxBundleSizeBytes` property if set, otherwise 1 GiB.
+     * `aws.sonatype.centralPortal.maxBundleSizeBytes` property; unchecked if neither is set.
      */
     @get:Input
     @get:Optional
@@ -61,9 +61,7 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         timeoutDuration.convention(
             project.prop(PUBLISH_TIMEOUT_PROPERTY)?.toString()?.let { Duration.parse(it) } ?: DEFAULT_PUBLISH_TIMEOUT,
         )
-        maxBundleSizeBytes.convention(
-            project.prop(MAX_BUNDLE_SIZE_PROPERTY)?.toString()?.toLong() ?: DEFAULT_MAX_BUNDLE_SIZE_BYTES,
-        )
+        project.prop(MAX_BUNDLE_SIZE_PROPERTY)?.toString()?.toLong()?.let(maxBundleSizeBytes::convention)
         pollInterval.convention(15.seconds)
     }
 
@@ -71,7 +69,6 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         const val PUBLISH_TIMEOUT_PROPERTY = "aws.sonatype.centralPortal.publishTimeout"
         const val MAX_BUNDLE_SIZE_PROPERTY = "aws.sonatype.centralPortal.maxBundleSizeBytes"
         val DEFAULT_PUBLISH_TIMEOUT = 2.hours
-        const val DEFAULT_MAX_BUNDLE_SIZE_BYTES = 1024L * 1024 * 1024
     }
 
     @TaskAction
@@ -79,7 +76,7 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         val (result, time) = measureTimedValue {
             val client = SonatypeCentralPortalClient.fromEnvironment()
             val file = bundle.asFile.get()
-            checkBundleSize(file, maxBundleSizeBytes.get())
+            maxBundleSizeBytes.orNull?.let { checkBundleSize(file, it) }
 
             // 1) Upload
             val deploymentId = client.uploadBundle(file, file.name)
@@ -115,12 +112,10 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
     }
 }
 
-/** https://central.sonatype.org/publish/publish-portal-upload/ documents a 1GB limit per uploaded archive. */
 internal fun checkBundleSize(bundle: File, maxBytes: Long) {
     val size = bundle.length()
     check(size <= maxBytes) {
-        "Bundle ${bundle.name} is $size bytes, which exceeds the limit of $maxBytes bytes. Central Portal documents a " +
-            "1GB limit per uploaded archive (https://central.sonatype.org/publish/publish-portal-upload/). Split the " +
-            "bundle, or set ${SonatypeCentralPortalPublishTask.MAX_BUNDLE_SIZE_PROPERTY} if a higher limit applies."
+        "Bundle ${bundle.name} is $size bytes, which exceeds the configured limit of $maxBytes bytes " +
+            "(${SonatypeCentralPortalPublishTask.MAX_BUNDLE_SIZE_PROPERTY})."
     }
 }
