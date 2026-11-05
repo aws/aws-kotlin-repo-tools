@@ -120,10 +120,11 @@ fun Project.configureKmpTargets() {
             if (hasPosix) {
                 common {
                     group("native") {
+                        // Linux and Apple but NOT Mingw/Windows. Nest the template's linux and apple groups so
+                        // linuxMain and appleMain depend on posixMain.
                         group("posix") {
-                            // Linux and Apple but NOT Mingw/Windows
-                            withLinux()
-                            withApple()
+                            group("linux")
+                            group("apple")
                         }
                     }
                 }
