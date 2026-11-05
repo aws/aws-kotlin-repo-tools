@@ -5,15 +5,17 @@
 
 package aws.sdk.kotlin.gradle.publishing
 
+import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
+import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTimedValue
 
@@ -34,10 +36,21 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         bundle.set(Path(path).toFile())
     }
 
-    /** Max time to wait for final state. */
+    /**
+     * Max time to wait for final state. Defaults to the `aws.sonatype.centralPortal.publishTimeout` property (parsed
+     * by [Duration.parse], e.g. `3h` or `PT90M`) if set, otherwise 2 hours.
+     */
     @get:Input
     @get:Optional
     abstract val timeoutDuration: Property<Duration>
+
+    /**
+     * Max bundle size in bytes, checked before uploading. Defaults to the
+     * `aws.sonatype.centralPortal.maxBundleSizeBytes` property if set, otherwise 1 GiB.
+     */
+    @get:Input
+    @get:Optional
+    abstract val maxBundleSizeBytes: Property<Long>
 
     /** Poll interval. */
     @get:Input
@@ -45,8 +58,20 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
     abstract val pollInterval: Property<Duration>
 
     init {
-        timeoutDuration.convention(45.minutes)
+        timeoutDuration.convention(
+            project.prop(PUBLISH_TIMEOUT_PROPERTY)?.toString()?.let { Duration.parse(it) } ?: DEFAULT_PUBLISH_TIMEOUT,
+        )
+        maxBundleSizeBytes.convention(
+            project.prop(MAX_BUNDLE_SIZE_PROPERTY)?.toString()?.toLong() ?: DEFAULT_MAX_BUNDLE_SIZE_BYTES,
+        )
         pollInterval.convention(15.seconds)
+    }
+
+    internal companion object {
+        const val PUBLISH_TIMEOUT_PROPERTY = "aws.sonatype.centralPortal.publishTimeout"
+        const val MAX_BUNDLE_SIZE_PROPERTY = "aws.sonatype.centralPortal.maxBundleSizeBytes"
+        val DEFAULT_PUBLISH_TIMEOUT = 2.hours
+        const val DEFAULT_MAX_BUNDLE_SIZE_BYTES = 1024L * 1024 * 1024
     }
 
     @TaskAction
@@ -54,6 +79,7 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         val (result, time) = measureTimedValue {
             val client = SonatypeCentralPortalClient.fromEnvironment()
             val file = bundle.asFile.get()
+            checkBundleSize(file, maxBundleSizeBytes.get())
 
             // 1) Upload
             val deploymentId = client.uploadBundle(file, file.name)
@@ -86,5 +112,15 @@ abstract class SonatypeCentralPortalPublishTask : DefaultTask() {
         } finally {
             logger.lifecycle("⏱️ Completed in $time")
         }
+    }
+}
+
+/** https://central.sonatype.org/publish/publish-portal-upload/ documents a 1GB limit per uploaded archive. */
+internal fun checkBundleSize(bundle: File, maxBytes: Long) {
+    val size = bundle.length()
+    check(size <= maxBytes) {
+        "Bundle ${bundle.name} is $size bytes, which exceeds the limit of $maxBytes bytes. Central Portal documents a " +
+            "1GB limit per uploaded archive (https://central.sonatype.org/publish/publish-portal-upload/). Split the " +
+            "bundle, or set ${SonatypeCentralPortalPublishTask.MAX_BUNDLE_SIZE_PROPERTY} if a higher limit applies."
     }
 }
