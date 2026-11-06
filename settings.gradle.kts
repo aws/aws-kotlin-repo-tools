@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 }
 
 include(":build-plugins:build-support")
+include(":build-plugins:dokka-gfm")
 include(":build-plugins:kmp-conventions")
 include(":build-plugins:smithy-build")
 include(":ktlint:style-rules")
