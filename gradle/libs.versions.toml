@@ -11,7 +11,7 @@ kotlinx-serialization-version = "1.11.0"
 proguard-version = "7.10.0"
 # Must match the Dokka version used by consuming repos (aws-sdk-kotlin, smithy-kotlin: 2.2.0).
 # A Dokka plugin links against dokka-base/dokka-core APIs that are version-coupled to the Dokka runtime.
-dokka-version = "2.2.0"
+dokka-version = "2.3.0"
 # The jsoup version dokka-base 2.2.0 depends on; dokka-lazy-load compiles against it and uses Dokka's copy at runtime.
 jsoup-version = "1.16.1"
 htmlunit-version = "5.7.0"
