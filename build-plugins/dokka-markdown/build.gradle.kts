@@ -25,10 +25,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        val awsKotlinDokkaGfmPlugin by creating {
-            id = "aws.sdk.kotlin.gradle.dokkagfm"
-            implementationClass = "aws.sdk.kotlin.gradle.dokka.DokkaGfmPlugin"
-            description = "Adds a GitHub Flavored Markdown (GFM) publication to Dokka"
+        val awsKotlinDokkaMarkdownPlugin by creating {
+            id = "aws.sdk.kotlin.gradle.dokkamarkdown"
+            implementationClass = "aws.sdk.kotlin.gradle.dokka.markdown.DokkaMarkdownPlugin"
+            description = "Adds a Markdown (GitHub Flavored Markdown) publication to Dokka"
         }
     }
 }
