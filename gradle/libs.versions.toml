@@ -7,7 +7,7 @@ smithy-gradle-plugin-version = "1.5.0"
 coroutines-version = "1.11.0"
 slf4j-version = "2.0.20"
 okhttp-version = "5.5.0"
-kotlinx-serialization-version = "1.11.0"
+kotlinx-serialization-version = "1.12.0"
 proguard-version = "7.10.0"
 # Must match the Dokka version used by consuming repos (aws-sdk-kotlin, smithy-kotlin: 2.2.0).
 # A Dokka plugin links against dokka-base/dokka-core APIs that are version-coupled to the Dokka runtime.
