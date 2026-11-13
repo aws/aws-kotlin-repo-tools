@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 
 include(":build-plugins:build-support")
 include(":build-plugins:dokka-lazy-load")
+include(":build-plugins:dokka-markdown")
 include(":build-plugins:kmp-conventions")
 include(":build-plugins:smithy-build")
 include(":ktlint:style-rules")

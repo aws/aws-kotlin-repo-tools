@@ -33,6 +33,7 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 dokka-core = { module = "org.jetbrains.dokka:dokka-core", version.ref = "dokka-version" }
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka-version" }
 dokka-templating-plugin = { module = "org.jetbrains.dokka:templating-plugin", version.ref = "dokka-version" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka-version" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup-version" }
 htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit-version" }
 
