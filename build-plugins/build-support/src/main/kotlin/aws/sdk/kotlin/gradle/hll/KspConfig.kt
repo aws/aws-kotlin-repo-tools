@@ -12,23 +12,13 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 /**
- * Configures project to consume generated code from configured KSP projects
+ * Configures project to consume generated code from configured KSP projects.
  *
- * FIXME: This is a dirty hack for JVM-only builds which KSP doesn't consider to be "multiplatform".
- *
- * FIXME: Needs to work with Kotlin Native builds as well, old (non-working) code for reference:
- * ```kt
- *      if (project.NATIVE_ENABLED) {
- *         // Configure KSP for multiplatform: https://kotlinlang.org/docs/ksp-multiplatform.html
- *         // https://github.com/google/ksp/issues/963#issuecomment-1894144639
- *         // https://github.com/google/ksp/issues/965
- *         dependencies.add("kspCommonMainMetadata", project(":hll:dynamodb-mapper:dynamodb-mapper-ops-codegen"))
- *
- *         kmpExt.sourceSets.getByName("commonMain") {
- *             kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
- *         }
- *      }
- * ```
+ * KSP does not treat a JVM-only build as "multiplatform", so the JVM-generated sources are moved from the
+ * JVM output directory into a commonMain-registered directory (see [moveGenSrc] below) and consumed from
+ * there. This also supports Kotlin/Native targets: every KSP task that reads the generated commonMain
+ * directory is wired to depend on the move, so KMP projects with Native targets build without
+ * implicit-dependency validation failures.
  */
 fun Project.configureKspCodegen(kspProjects: List<String>) {
     // Depend on KSP projects we want to consume from
@@ -72,6 +62,18 @@ fun Project.configureKspCodegen(kspProjects: List<String>) {
     }
 
     tasks.withType(KotlinCompilationTask::class.java) {
+        dependsOn(moveGenSrc)
+    }
+
+    // `moveGenSrc` writes into `build/generated/ksp/common/commonMain`, which is registered below as a
+    // commonMain source directory. Every KSP task that processes commonMain (the Kotlin/Native per-target
+    // tasks such as `kspKotlinLinuxX64`/`kspKotlinLinuxArm64`, the `kspCommonMainKotlinMetadata` /
+    // `kspJvmAndNativeMainKotlinMetadata` tasks, and their test variants) therefore reads that directory as
+    // an input. KSP tasks are not `KotlinCompilationTask`s, so the wiring above does not cover them, and
+    // Gradle fails with an implicit-dependency validation error for KMP projects that have Native targets.
+    // Wire every KSP task to `moveGenSrc` except `kspKotlinJvm`, which produces the input `moveGenSrc`
+    // consumes (and which `moveGenSrc` already depends on) -- excluding it avoids a dependency cycle.
+    tasks.matching { it.name.startsWith("ksp", ignoreCase = true) && it.name != "kspKotlinJvm" }.configureEach {
         dependsOn(moveGenSrc)
     }
 
