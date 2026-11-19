@@ -39,9 +39,11 @@ jobs:
 
       - name: Resolve new version
         id: resolve-new-version
+        env:
+          VERSION_OVERRIDE: ${{ inputs.version-override }}
         run: |
-          if [ -n "${{ inputs.version-override }}" ]; then
-            echo "NEW_VERSION=${{ inputs.version-override }}" >> "$GITHUB_OUTPUT"
+          if [ -n "$VERSION_OVERRIDE" ]; then
+            echo "NEW_VERSION=$VERSION_OVERRIDE" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           
@@ -101,5 +103,7 @@ jobs:
 
       - name: Delete failed release tag
         if: ${{ failure() && steps.release-job.outcome != 'success' }}
+        env:
+          NEW_VERSION: ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
         run: |
-          git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+          git push --delete origin "$NEW_VERSION"
