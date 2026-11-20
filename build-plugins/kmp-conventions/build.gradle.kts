@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":build-plugins:build-support"))
     compileOnly(kotlin("gradle-plugin", "2.1.0"))
     testImplementation(libs.kotlin.test)
+    testImplementation(kotlin("gradle-plugin", "2.1.0"))
 }
 
 gradlePlugin {
