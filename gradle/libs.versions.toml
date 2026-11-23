@@ -14,7 +14,7 @@ proguard-version = "7.10.0"
 dokka-version = "2.2.0"
 # The jsoup version dokka-base 2.2.0 depends on; dokka-lazy-load compiles against it and uses Dokka's copy at runtime.
 jsoup-version = "1.16.1"
-htmlunit-version = "5.7.0"
+htmlunit-version = "5.8.0"
 
 [libraries]
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint-version" }
