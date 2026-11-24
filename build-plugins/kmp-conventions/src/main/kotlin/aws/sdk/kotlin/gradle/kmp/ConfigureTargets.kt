@@ -12,7 +12,13 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithSimulatorTests
+import org.jetbrains.kotlin.gradle.plugin.mpp.TestExecutable
+import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
 internal fun <T> Project.tryGetClass(className: String): Class<T>? {
@@ -157,7 +163,43 @@ fun Project.configureKmpTargets() {
         }
 
         kmpExt.configureSourceSetsConvention()
+        kmpExt.skipLinkingUnrunnableTests()
     }
+}
+
+/**
+ * Kotlin/Native tests run only on a compatible host (e.g. `macosX64Test` and `iosX64Test` are skipped on Apple
+ * silicon), but `check` still links their test executables. Skip those link tasks unless one is requested by name,
+ * keeping test compilation.
+ */
+internal fun KotlinMultiplatformExtension.skipLinkingUnrunnableTests() {
+    val requestedTasks = project.gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.toSet()
+    targets.withType(KotlinNativeTarget::class.java).configureEach {
+        val testKind = when (this) {
+            is KotlinNativeTargetWithSimulatorTests -> NativeTestKind.SIMULATOR
+            is KotlinNativeTargetWithHostTests -> NativeTestKind.HOST
+            else -> return@configureEach
+        }
+        if (!canRunNativeTests(konanTarget, testKind, HostManager.host)) {
+            binaries.withType(TestExecutable::class.java).configureEach {
+                linkTaskProvider.configure {
+                    val requested = name in requestedTasks
+                    onlyIf("test executable can't run on this host and wasn't requested") { requested }
+                }
+            }
+        }
+    }
+}
+
+internal enum class NativeTestKind { HOST, SIMULATOR }
+
+/**
+ * Mirrors the Kotlin Gradle plugin's rule for enabling native test tasks: host tests run only on the target itself,
+ * simulator tests only on a macOS host of the same architecture.
+ */
+internal fun canRunNativeTests(target: KonanTarget, kind: NativeTestKind, host: KonanTarget): Boolean = when (kind) {
+    NativeTestKind.HOST -> target == host
+    NativeTestKind.SIMULATOR -> host.family == Family.OSX && host.architecture == target.architecture
 }
 
 fun Project.configureCommon() {
