@@ -169,9 +169,11 @@ fun Project.configureKmpTargets() {
 
 /**
  * Kotlin/Native tests run only on a compatible host (e.g. `macosX64Test` and `iosX64Test` are skipped on Apple
- * silicon), but `check` still links their test executables. Disable those link tasks, keeping test compilation.
+ * silicon), but `check` still links their test executables. Skip those link tasks unless one is requested by name,
+ * keeping test compilation.
  */
 internal fun KotlinMultiplatformExtension.skipLinkingUnrunnableTests() {
+    val requestedTasks = project.gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.toSet()
     targets.withType(KotlinNativeTarget::class.java).configureEach {
         val testKind = when (this) {
             is KotlinNativeTargetWithSimulatorTests -> NativeTestKind.SIMULATOR
@@ -180,7 +182,10 @@ internal fun KotlinMultiplatformExtension.skipLinkingUnrunnableTests() {
         }
         if (!canRunNativeTests(konanTarget, testKind, HostManager.host)) {
             binaries.withType(TestExecutable::class.java).configureEach {
-                linkTaskProvider.configure { enabled = false }
+                linkTaskProvider.configure {
+                    val requested = name in requestedTasks
+                    onlyIf("test executable can't run on this host and wasn't requested") { requested }
+                }
             }
         }
     }
