@@ -2,9 +2,9 @@
 
 This repository contains shared tooling for AWS Kotlin repositories:
 
-* `awslabs/aws-sdk-kotlin`
+* `aws/aws-sdk-kotlin`
 * `smithy-lang/smithy-kotlin`
-* `awslabs/aws-crt-kotlin`
+* `aws/aws-crt-kotlin`
 
 It contains shared custom Gradle plugins and build logic used to build and release those repositories.
 
@@ -52,6 +52,8 @@ To use a local version of the plugin in downstream projects (such as `smithy-kot
 ### Project Structure
 
 * `:build-plugins:build-support`   - common build support (publishing, linting, utils, etc)
+* `:build-plugins:dokka-lazy-load` - Dokka plugin that replaces the monolithic `navigation.html` with a lazily loaded navigation pane
+* `:build-plugins:dokka-markdown`  - Plugin that adds a Markdown (GitHub Flavored Markdown) publication to Dokka
 * `:build-plugins:kmp-conventions` - Plugin that applies common conventions for KMP projects (source sets, targets, etc)
 * `:build-plugins:smithy-build`    - Opinionated plugin that wraps the `smithy-base` plugin with a DSL for generating projections dynamically
 * `:ktlint-rules`                  - Custom ktlint rules (consumed by `build-support` at runtime)

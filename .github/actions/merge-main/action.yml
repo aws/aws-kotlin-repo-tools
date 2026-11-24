@@ -134,6 +134,9 @@ runs:
               git switch -c "$merge_branch" origin/main
             fi
 
+            echo "...adding a marker commit so $merge_branch does not share main's SHA"
+            git commit --allow-empty -m "misc: merge main into $branch"
+
             git push -u --force-with-lease origin "$merge_branch"
             open_pr_and_merge "$branch" "$merge_branch"
           done

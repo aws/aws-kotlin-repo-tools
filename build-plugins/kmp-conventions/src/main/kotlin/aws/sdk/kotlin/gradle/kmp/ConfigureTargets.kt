@@ -10,8 +10,15 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithSimulatorTests
+import org.jetbrains.kotlin.gradle.plugin.mpp.TestExecutable
+import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
 internal fun <T> Project.tryGetClass(className: String): Class<T>? {
@@ -33,9 +40,13 @@ val Project.hasCommon: Boolean get() = files.any {
 
 // always configured with common
 val Project.hasJvm: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "jvm" }
-val Project.hasNative: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "native" }
+val Project.hasNative: Boolean get() = hasCommon || hasJvmAndNative || hasNativeAndWeb || files.any { it.name == "native" }
 val Project.hasJs: Boolean get() = hasCommon || files.any { it.name == "js" }
 val Project.hasJvmAndNative: Boolean get() = hasCommon || files.any { it.name == "jvmAndNative" }
+val Project.hasWasmJs: Boolean get() = hasCommon || hasNativeAndWeb || files.any { it.name == "wasmJs" }
+
+/** Code shared by native and web (wasmJs today, js later) targets; only for modules with a nativeAndWeb/ folder. */
+val Project.hasNativeAndWeb: Boolean get() = files.any { it.name == "nativeAndWeb" }
 
 // less frequent, more explicit targets
 val Project.hasDesktop: Boolean get() = hasNative || files.any { it.name == "desktop" }
@@ -48,7 +59,7 @@ val Project.hasPosix: Boolean get() = hasNative || hasJvmAndNative || files.any 
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows || hasPosix
+val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasWasmJs || hasNativeAndWeb || hasDesktop || hasLinux || hasApple || hasWindows || hasPosix
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
@@ -80,6 +91,16 @@ fun Project.configureKmpTargets() {
                 }
             }
 
+            if (hasNativeAndWeb) {
+                common {
+                    // nest the template's native and web groups so nativeMain and webMain depend on nativeAndWebMain
+                    group("nativeAndWeb") {
+                        group("native")
+                        group("web")
+                    }
+                }
+            }
+
             if (hasWindows) {
                 common {
                     group("native") {
@@ -105,10 +126,11 @@ fun Project.configureKmpTargets() {
             if (hasPosix) {
                 common {
                     group("native") {
+                        // Linux and Apple but NOT Mingw/Windows. Nest the template's linux and apple groups so
+                        // linuxMain and appleMain depend on posixMain.
                         group("posix") {
-                            // Linux and Apple but NOT Mingw/Windows
-                            withLinux()
-                            withApple()
+                            group("linux")
+                            group("apple")
                         }
                     }
                 }
@@ -124,6 +146,10 @@ fun Project.configureKmpTargets() {
 
         // FIXME Configure JS
 
+        if (hasWasmJs && WASM_ENABLED) {
+            configureWasmJs()
+        }
+
         if (NATIVE_ENABLED) {
             if ((hasApple || hasDesktop) && (HostManager.hostIsMac || NATIVE_ENABLE_ALL_TARGETS)) {
                 kmpExt.apply { configureApple() }
@@ -137,7 +163,43 @@ fun Project.configureKmpTargets() {
         }
 
         kmpExt.configureSourceSetsConvention()
+        kmpExt.skipLinkingUnrunnableTests()
     }
+}
+
+/**
+ * Kotlin/Native tests run only on a compatible host (e.g. `macosX64Test` and `iosX64Test` are skipped on Apple
+ * silicon), but `check` still links their test executables. Skip those link tasks unless one is requested by name,
+ * keeping test compilation.
+ */
+internal fun KotlinMultiplatformExtension.skipLinkingUnrunnableTests() {
+    val requestedTasks = project.gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.toSet()
+    targets.withType(KotlinNativeTarget::class.java).configureEach {
+        val testKind = when (this) {
+            is KotlinNativeTargetWithSimulatorTests -> NativeTestKind.SIMULATOR
+            is KotlinNativeTargetWithHostTests -> NativeTestKind.HOST
+            else -> return@configureEach
+        }
+        if (!canRunNativeTests(konanTarget, testKind, HostManager.host)) {
+            binaries.withType(TestExecutable::class.java).configureEach {
+                linkTaskProvider.configure {
+                    val requested = name in requestedTasks
+                    onlyIf("test executable can't run on this host and wasn't requested") { requested }
+                }
+            }
+        }
+    }
+}
+
+internal enum class NativeTestKind { HOST, SIMULATOR }
+
+/**
+ * Mirrors the Kotlin Gradle plugin's rule for enabling native test tasks: host tests run only on the target itself,
+ * simulator tests only on a macOS host of the same architecture.
+ */
+internal fun canRunNativeTests(target: KonanTarget, kind: NativeTestKind, host: KonanTarget): Boolean = when (kind) {
+    NativeTestKind.HOST -> target == host
+    NativeTestKind.SIMULATOR -> host.family == Family.OSX && host.architecture == target.architecture
 }
 
 fun Project.configureCommon() {
@@ -171,6 +233,15 @@ fun Project.configureJvm() {
             exceptionFormat = TestExceptionFormat.FULL
         }
         useJUnitPlatform()
+    }
+}
+
+@OptIn(ExperimentalWasmDsl::class)
+fun Project.configureWasmJs() {
+    kotlin {
+        wasmJs {
+            nodejs()
+        }
     }
 }
 
@@ -234,3 +305,4 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
 val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
 val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
 val Project.NATIVE_ENABLE_ALL_TARGETS get() = prop("aws.kotlin.native.enableAllTargets")?.let { it == "true" } ?: false
+val Project.WASM_ENABLED get() = prop("aws.kotlin.wasm")?.let { it == "true" } ?: false
